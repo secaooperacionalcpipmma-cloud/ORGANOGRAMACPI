@@ -1,0 +1,635 @@
+import { GrandCommand, SubordinateUnit, TopCommandInfo, OrganogramDatabase } from '../types/organogram';
+
+export const initialTopCommand: TopCommandInfo = {
+  titulo: 'ORGANOGRAMA CPI 2026',
+  subtitulo: 'COMANDO DO POLICIAMENTO DO INTERIOR (CPI)',
+  instituicao: 'POLÍCIA MILITAR DO MARANHÃO - PMMA',
+  sigla: 'CPI / PMMA',
+  comandanteGeral: 'CEL QOEM WALLACE GLEYDISON AMORIM DE SOUSA',
+  comandanteCPI: 'CEL QOEM MÁRCIO SILVA',
+  sede: 'São Luís - MA (Quartel do Comando Geral)',
+  contato: '(98) 99110-8830',
+  email: 'secaooperacional.cpi.pmma@gmail.com',
+  dataAtualizacao: '05/11/2026',
+  emblemaPrincipalUrl: '/assets/aistudio/CPI_8bc02a05.jpg'
+};
+
+export const initialCommands: GrandCommand[] = [
+  {
+    id: 'cpa-i-1',
+    sigla: 'CPA I-1',
+    nome: 'Comando de Policiamento de Área do Interior - 1',
+    regiao: 'Região do Médio Mearim e Vale do Munim',
+    comandante: 'CEL QOEM TÚLIO',
+    posto: 'CEL QOEM',
+    telefone: '(98) 98436-2938',
+    email: 'pmmacpai1.2@gmail.com',
+    municipioSede: 'Bacabal',
+    emblemaUrl: '/assets/aistudio/CPAI_1_9c470153.jpg',
+    ordem: 1
+  },
+  {
+    id: 'cpa-i-2',
+    sigla: 'CPA I-2',
+    nome: 'Comando de Policiamento de Área do Interior - 2',
+    regiao: 'Região Central do Maranhão',
+    comandante: 'CEL QOEM ARÃO',
+    posto: 'CEL QOEM',
+    telefone: '(99) 98406-1227',
+    email: 'cpai2pm@gmail.com',
+    municipioSede: 'Barra do Corda',
+    emblemaUrl: '/assets/aistudio/CPAI_2_bc1fb4c3.jpg',
+    ordem: 2
+  },
+  {
+    id: 'cpa-i-3',
+    sigla: 'CPA I-3',
+    nome: 'Comando de Policiamento de Área do Interior - 3',
+    regiao: 'Região Tocantina',
+    comandante: 'CEL QOEM DIÓGENES',
+    posto: 'CEL QOEM',
+    telefone: '(98) 98871-7911',
+    email: 'cpai3.itz@gmail.com',
+    municipioSede: 'Imperatriz',
+    emblemaUrl: '/assets/aistudio/CPAI_3_ea4e9ae5.jpg',
+    ordem: 3
+  },
+  {
+    id: 'cpa-i-4',
+    sigla: 'CPA I-4',
+    nome: 'Comando de Policiamento de Área do Interior - 4',
+    regiao: 'Região dos Cocais',
+    comandante: 'CEL QOEM RICARDO',
+    posto: 'CEL QOEM',
+    telefone: '(99) 98208-7986',
+    email: 'cpai4pmma3@gmail.com',
+    municipioSede: 'Caxias',
+    emblemaUrl: '/assets/aistudio/CPAI_4_60a4f623.jpg',
+    ordem: 4
+  },
+  {
+    id: 'cpa-i-5',
+    sigla: 'CPA I-5',
+    nome: 'Comando de Policiamento de Área do Interior - 5',
+    regiao: 'Baixada e Litoral Ocidental',
+    comandante: 'TEN CEL QOEM MIGUEL',
+    posto: 'TEN CEL QOEM',
+    telefone: '(86) 99421-2857',
+    email: 'cpai5pm2@gmail.com',
+    municipioSede: 'Pinheiro',
+    emblemaUrl: '/assets/aistudio/CPAI_5_13b78f7a.jpg',
+    ordem: 5
+  },
+  {
+    id: 'cpa-i-6',
+    sigla: 'CPA I-6',
+    nome: 'Comando de Policiamento de Área do Interior - 6',
+    regiao: 'Sul Maranhense',
+    comandante: 'CEL QOEM CIRO',
+    posto: 'CEL QOEM',
+    telefone: '(98) 98883-0648',
+    email: 'cpai6pmma16@gmail.com',
+    municipioSede: 'Balsas',
+    emblemaUrl: '/assets/aistudio/CPAI_6_4b34bf73.jpg',
+    ordem: 6
+  },
+  {
+    id: 'cpa-i-7',
+    sigla: 'CPA I-7',
+    nome: 'Comando de Policiamento de Área do Interior - 7',
+    regiao: 'Baixo Parnaíba e Munim',
+    comandante: 'CEL QOEM MAURICIO',
+    posto: 'CEL QOEM',
+    telefone: '(98) 98269-4677',
+    email: 'cpai7pmma@gmail.com',
+    municipioSede: 'Chapadinha',
+    emblemaUrl: '/assets/aistudio/CPAI_7_726460bc.jpg',
+    ordem: 7
+  },
+  {
+    id: 'cpa-i-8',
+    sigla: 'CPA I-8',
+    nome: 'Comando de Policiamento de Área do Interior - 8',
+    regiao: 'Vale do Pindaré e Alto Turi',
+    comandante: 'CEL QOEM MARCELO',
+    posto: 'CEL QOEM',
+    telefone: '(98) 99208-3477',
+    email: 'cpai8.pmma@gmail.com',
+    municipioSede: 'Pindaré',
+    emblemaUrl: '/assets/aistudio/CPAI_8_8e387e71.jpg',
+    ordem: 8
+  },
+  {
+    id: 'cpa-i-9',
+    sigla: 'CPA I-9',
+    nome: 'Comando de Policiamento de Área do Interior - 9',
+    regiao: 'Leste e Alto Sertão Maranhense',
+    comandante: 'TEN CEL QOEM SOUSA',
+    posto: 'TEN CEL QOEM',
+    telefone: '(86) 98812-1334',
+    email: 'cpai9pmma@gmail.com',
+    municipioSede: 'Timon',
+    emblemaUrl: '/assets/aistudio/CPAI-9_5cb21434.jfif',
+    ordem: 9
+  }
+];
+
+export const initialUnits: SubordinateUnit[] = [
+  // =================== CPA I-1 ===================
+  {
+    id: 'unit-15-bpm',
+    identificacao: '15º BPM',
+    tipo: 'Batalhão',
+    nome: '15º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-1',
+    municipio: 'BACABAL',
+    comandante: 'TEN CEL QOEM LEILA',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98103-6565'
+  },
+  {
+    id: 'unit-19-bpm',
+    identificacao: '19º BPM',
+    tipo: 'Batalhão',
+    nome: '19º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-1',
+    municipio: 'PEDREIRAS',
+    comandante: 'TEN CEL QOEM BRANDÃO',
+    posto: 'TEN CEL QOEM',
+    telefone: '(98) 98181-9383'
+  },
+  {
+    id: 'unit-23-bpm',
+    identificacao: '23º BPM',
+    tipo: 'Batalhão',
+    nome: '23º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-1',
+    municipio: 'SÃO MATEUS',
+    comandante: 'TEN CEL QOEM HAMILTON',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98121-5583'
+  },
+  {
+    id: 'unit-39-bpm',
+    identificacao: '39º BPM',
+    tipo: 'Batalhão',
+    nome: '39º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-1',
+    municipio: 'LAGO DA PEDRA',
+    comandante: 'TEN CEL QOEM AURÉLIO',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98124-5864'
+  },
+
+  // =================== CPA I-2 ===================
+  {
+    id: 'unit-5-bpm',
+    identificacao: '5º BPM',
+    tipo: 'Batalhão',
+    nome: '5º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-2',
+    municipio: 'BARRA DO CORDA',
+    comandante: 'TEN CEL QOEM WELLINGTON',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98521-6359'
+  },
+  {
+    id: 'unit-18-bpm',
+    identificacao: '18º BPM',
+    tipo: 'Batalhão',
+    nome: '18º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-2',
+    municipio: 'PRESIDENTE DUTRA',
+    comandante: 'TC QOEM FLÁVIO',
+    posto: 'TC QOEM',
+    telefone: '(99) 98299-6909'
+  },
+  {
+    id: 'unit-33-bpm',
+    identificacao: '33º BPM',
+    tipo: 'Batalhão',
+    nome: '33º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-2',
+    municipio: 'COLINAS',
+    comandante: 'TC QOEM AÉCYO',
+    posto: 'TC QOEM',
+    telefone: '(99) 99153-6386'
+  },
+  {
+    id: 'unit-37-bpm',
+    identificacao: '37º BPM',
+    tipo: 'Batalhão',
+    nome: '37º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-2',
+    municipio: 'GRAJAÚ',
+    comandante: 'TEN CEL QOEM LEANDRO',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98521-6420'
+  },
+
+  // =================== CPA I-3 ===================
+  {
+    id: 'unit-3-bpm',
+    identificacao: '3º BPM',
+    tipo: 'Batalhão',
+    nome: '3º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'IMPERATRIZ',
+    comandante: 'TEN CEL QOEM CARLOS',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 99221-2642'
+  },
+  {
+    id: 'unit-12-bpm',
+    identificacao: '12º BPM',
+    tipo: 'Batalhão',
+    nome: '12º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'ESTREITO',
+    comandante: 'TEN CEL QOEM LUNA',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98119-6412'
+  },
+  {
+    id: 'unit-14-bpm',
+    identificacao: '14º BPM',
+    tipo: 'Batalhão',
+    nome: '14º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'IMPERATRIZ',
+    comandante: 'TEN CEL QOEM REMY',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 99169-6559'
+  },
+  {
+    id: 'unit-26-bpm',
+    identificacao: '26º BPM',
+    tipo: 'Batalhão',
+    nome: '26º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'AÇAILÂNDIA',
+    comandante: 'MAJ QOEM LIMA',
+    posto: 'MAJ QOEM',
+    telefone: '(99) 98141-1436'
+  },
+  {
+    id: 'unit-30-bpm',
+    identificacao: '30º BPM',
+    tipo: 'Batalhão',
+    nome: '30º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'BURITICUPU',
+    comandante: 'TEN CEL QOEM NELSON',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98115-5145'
+  },
+  {
+    id: 'unit-32-bpm',
+    identificacao: '32º BPM',
+    tipo: 'Batalhão',
+    nome: '32º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'CIDELÂNDIA',
+    comandante: 'MAJ QOEM SANCHES',
+    posto: 'MAJ QOEM',
+    telefone: '(99) 98404-9566'
+  },
+  {
+    id: 'unit-34-bpm',
+    identificacao: '34º BPM',
+    tipo: 'Batalhão',
+    nome: '34º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'AMARANTE',
+    comandante: 'TEN CEL QOEM CLAUDINEY',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 99111-9785'
+  },
+  {
+    id: 'unit-1-epmont',
+    identificacao: '1º EPMONT',
+    tipo: 'EPMONT',
+    nome: '1º Esquadrão de Polícia Montada',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'IMPERATRIZ',
+    comandante: 'CAP QOEM SAMUEL',
+    posto: 'CAP QOEM',
+    telefone: '(99) 99905-6777'
+  },
+  {
+    id: 'unit-2-bmt',
+    identificacao: '2º BMT',
+    tipo: 'BMT',
+    nome: '2º Batalhão de Motopatrulhamento Tático',
+    grandCommandId: 'cpa-i-3',
+    municipio: 'IMPERATRIZ',
+    comandante: 'MAJ QOEM ANDERSON',
+    posto: 'MAJ QOEM',
+    telefone: '(99) 98813-0090'
+  },
+
+  // =================== CPA I-4 ===================
+  {
+    id: 'unit-2-bpm',
+    identificacao: '2º BPM',
+    tipo: 'Batalhão',
+    nome: '2º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-4',
+    municipio: 'CAXIAS',
+    comandante: 'MAJ QOEM SOARES JÚNIOR',
+    posto: 'MAJ QOEM',
+    telefone: '99 98433-3956'
+  },
+  {
+    id: 'unit-17-bpm',
+    identificacao: '17º BPM',
+    tipo: 'Batalhão',
+    nome: '17º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-4',
+    municipio: 'CODÓ',
+    comandante: 'TEN CEL QOEM SENILSON',
+    posto: 'TEN CEL QOEM',
+    telefone: '(98) 99170-4618'
+  },
+  {
+    id: 'unit-24-bpm',
+    identificacao: '24º BPM',
+    tipo: 'Batalhão',
+    nome: '24º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-4',
+    municipio: 'COROATÁ',
+    comandante: 'MAJ QOEM PEREIRA',
+    posto: 'MAJ QOEM',
+    telefone: '(98) 99609-1713'
+  },
+  {
+    id: 'unit-48-bpm',
+    identificacao: '48º BPM',
+    tipo: 'Batalhão',
+    nome: '48º Batalhão de Polícia Militar (Em Regulamentação)',
+    grandCommandId: 'cpa-i-4',
+    municipio: 'EM REGULAMENTAÇÃO',
+    comandante: 'EM REGULAMENTAÇÃO',
+    posto: 'QOEM',
+    telefone: '-',
+    emRegulamentacao: true
+  },
+
+  // =================== CPA I-5 ===================
+  {
+    id: 'unit-10-bpm',
+    identificacao: '10º BPM',
+    tipo: 'Batalhão',
+    nome: '10º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-5',
+    municipio: 'PINHEIRO',
+    comandante: 'TC QOEM WELLINGTON',
+    posto: 'TC QOEM',
+    telefone: '98 98737-4482'
+  },
+  {
+    id: 'unit-25-bpm',
+    identificacao: '25º BPM',
+    tipo: 'Batalhão',
+    nome: '25º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-5',
+    municipio: 'CURURUPU',
+    comandante: 'TC QOEM ZADOCK',
+    posto: 'TC QOEM',
+    telefone: '(98) 98198-1892'
+  },
+  {
+    id: 'unit-36-bpm',
+    identificacao: '36º BPM',
+    tipo: 'Batalhão',
+    nome: '36º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-5',
+    municipio: 'VIANA',
+    comandante: 'TC QOEM ALEXANDRE',
+    posto: 'TC QOEM',
+    telefone: '(98) 8706-0464'
+  },
+  {
+    id: 'unit-41-bpm',
+    identificacao: '41º BPM',
+    tipo: 'Batalhão',
+    nome: '41º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-5',
+    municipio: 'MIRINZAL',
+    comandante: 'TC QOEM ANDRADE',
+    posto: 'TC QOEM',
+    telefone: '(98) 98265-7889'
+  },
+  {
+    id: 'unit-45-bpm',
+    identificacao: '45º BPM',
+    tipo: 'Batalhão',
+    nome: '45º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-5',
+    municipio: 'BEQUIMÃO',
+    comandante: 'MAJ QOEM GLEYDSON',
+    posto: 'MAJ QOEM',
+    telefone: '98 98727-9909'
+  },
+
+  // =================== CPA I-6 ===================
+  {
+    id: 'unit-4-bpm',
+    identificacao: '4º BPM',
+    tipo: 'Batalhão',
+    nome: '4º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-6',
+    municipio: 'BALSAS',
+    comandante: 'TEN CEL JEAN LEVI',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98123-1768'
+  },
+  {
+    id: 'unit-46-bpm',
+    identificacao: '46º BPM',
+    tipo: 'Batalhão',
+    nome: '46º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-6',
+    municipio: 'S. R DAS MANGABEIRAS',
+    comandante: 'TEN CEL QOEM GILBERTO',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98805-7646'
+  },
+  {
+    id: 'unit-2-cimt',
+    identificacao: '2º CIMT BALSAS',
+    tipo: 'CIMT',
+    nome: '2ª Companhia Independente de Motopatrulhamento Tático (Em Regulamentação)',
+    grandCommandId: 'cpa-i-6',
+    municipio: 'BALSAS',
+    comandante: 'EM REGULAMENTAÇÃO',
+    posto: 'QOEM',
+    telefone: '-',
+    emRegulamentacao: true
+  },
+
+  // =================== CPA I-7 ===================
+  {
+    id: 'unit-16-bpm',
+    identificacao: '16º BPM',
+    tipo: 'Batalhão',
+    nome: '16º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-7',
+    municipio: 'CHAPADINHA',
+    comandante: 'TC JALDEMIR',
+    posto: 'TC QOEM',
+    telefone: '(98) 98718-8841'
+  },
+  {
+    id: 'unit-27-bpm',
+    identificacao: '27º BPM',
+    tipo: 'Batalhão',
+    nome: '27º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-7',
+    municipio: 'ROSÁRIO',
+    comandante: 'MAJ QOEM LUCENA JUNIOR',
+    posto: 'MAJ QOEM',
+    telefone: '(98) 99131-8080'
+  },
+  {
+    id: 'unit-28-bpm',
+    identificacao: '28º BPM',
+    tipo: 'Batalhão',
+    nome: '28º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-7',
+    municipio: 'ITAPECURU',
+    comandante: 'TC QOEM PEREIRA',
+    posto: 'TC QOEM',
+    telefone: '(98) 98492-2017'
+  },
+
+  // =================== CPA I-8 ===================
+  {
+    id: 'unit-7-bpm',
+    identificacao: '7º BPM',
+    tipo: 'Batalhão',
+    nome: '7º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-8',
+    municipio: 'PINDARÉ',
+    comandante: 'MAJOR DANYELLE',
+    posto: 'MAJOR QOEM',
+    telefone: '(98) 98833-6744'
+  },
+  {
+    id: 'unit-29-bpm',
+    identificacao: '29º BPM',
+    tipo: 'Batalhão',
+    nome: '29º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-8',
+    municipio: 'ZÉ DOCA',
+    comandante: 'MAJ QOEM JOSUEL',
+    posto: 'MAJ QOEM',
+    telefone: '(98) 98917-3913'
+  },
+  {
+    id: 'unit-31-bpm',
+    identificacao: '31º BPM',
+    tipo: 'Batalhão',
+    nome: '31º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-8',
+    municipio: 'GOV. N. FREIRE',
+    comandante: 'TEN CEL NEILDON',
+    posto: 'TEN CEL QOEM',
+    telefone: '(98) 98167-4078'
+  },
+
+  // =================== CPA I-9 ===================
+  {
+    id: 'unit-11-bpm',
+    identificacao: '11º BPM',
+    tipo: 'Batalhão',
+    nome: '11º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-9',
+    municipio: 'TIMON',
+    comandante: 'TEN. CEL QOEM KRAIESKI',
+    posto: 'TEN. CEL QOEM',
+    telefone: '(86) 99960-9249'
+  },
+  {
+    id: 'unit-35-bpm',
+    identificacao: '35º BPM',
+    tipo: 'Batalhão',
+    nome: '35º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-9',
+    municipio: 'SÃO JOÃO DOS PATOS',
+    comandante: 'TEN CEL QOEM FERNANDO',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 98156-6610'
+  },
+  {
+    id: 'unit-44-bpm',
+    identificacao: '44º BPM',
+    tipo: 'Batalhão',
+    nome: '44º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-9',
+    municipio: 'COELHO NETO',
+    comandante: 'TEN CEL RAMALHO',
+    posto: 'TEN CEL QOEM',
+    telefone: '(98) 9881-33916'
+  },
+  {
+    id: 'unit-47-bpm',
+    identificacao: '47º BPM',
+    tipo: 'Batalhão',
+    nome: '47º Batalhão de Polícia Militar',
+    grandCommandId: 'cpa-i-9',
+    municipio: 'TIMON',
+    comandante: 'TEN CEL QOEM YASLAN',
+    posto: 'TEN CEL QOEM',
+    telefone: '(99) 99922-6256'
+  },
+  {
+    id: 'unit-1-cimt',
+    identificacao: '1ª CIMT',
+    tipo: 'CIMT',
+    nome: '1ª Companhia Independente de Motopatrulhamento Tático',
+    grandCommandId: 'cpa-i-9',
+    municipio: 'TIMON',
+    comandante: 'MAJOR QOEM JAMERSON',
+    posto: 'MAJOR QOEM',
+    telefone: '86 9 9811 4763'
+  }
+];
+
+export const initialCpeSpecialUnit = {
+  sigla: 'CPE',
+  unidade: '2º BPTUR: BARREIRINHAS',
+  municipios: [
+    '1- BARREIRINHAS',
+    '2- ÁGUA-DOCE',
+    '3- ARAIOSES',
+    '4- HUMBERTO DE CAMPOS',
+    '5- PAULINO NEVES',
+    '6- PRIMEIRA CRUZ',
+    '7- SANTO AMARO',
+    '8- TUTÓIA'
+  ]
+};
+
+export const initialDatabase: OrganogramDatabase = {
+  topCommand: initialTopCommand,
+  commands: initialCommands,
+  units: initialUnits,
+  history: [
+    {
+      id: 'hist-pdf-2026',
+      timestamp: '2026-11-05T11:50:00Z',
+      usuario: 'Comando Geral / CPI',
+      tipoAcao: 'ATUALIZAÇÃO POR PRINT IA',
+      descricao: 'Organograma CPI 2026 atualizado e alinhado exatamente com o documento oficial em PDF do CPI.',
+      totalAlteracoes: 37,
+      snapshot: {
+        topCommand: initialTopCommand,
+        commands: initialCommands,
+        units: initialUnits,
+        timestamp: '2026-11-05T11:50:00Z'
+      }
+    }
+  ],
+  lastUpdated: '05/11/2026'
+};
