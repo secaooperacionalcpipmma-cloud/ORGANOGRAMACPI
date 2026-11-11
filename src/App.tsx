@@ -648,16 +648,21 @@ export default function App() {
       {/* Offscreen High-Resolution Render Sheet for Pristine PDF/PNG Capture of the Attached Model */}
       <div 
         style={{ 
-          position: 'fixed', 
-          left: '-99999px', 
-          top: '0', 
-          pointerEvents: 'none', 
-          zIndex: -100, 
-          width: '1580px' 
+          position: 'absolute', 
+          top: 0, 
+          left: 0, 
+          width: 0, 
+          height: 0, 
+          overflow: 'hidden', 
+          pointerEvents: 'none',
+          opacity: 0,
+          zIndex: -9999
         }} 
         aria-hidden="true"
       >
-        <OfficialPdfModelSheet database={database} id="official-pdf-model-sheet" />
+        <div style={{ width: '1580px', minWidth: '1580px' }}>
+          <OfficialPdfModelSheet database={database} id="official-pdf-model-sheet" />
+        </div>
       </div>
 
       {/* Export Modal with Both Versions (Attached Model & Existing Cadastral Report) */}

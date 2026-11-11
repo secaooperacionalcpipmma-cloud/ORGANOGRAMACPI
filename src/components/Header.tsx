@@ -68,64 +68,60 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="bg-white border-b-4 border-[#005a2b] shadow-md sticky top-0 z-30 print:relative print:border-none">
       {/* Top green institutional bar */}
-      <div className="bg-[#005a2b] text-white px-4 py-1.5 text-xs font-semibold flex flex-wrap items-center justify-between tracking-wide">
-        <div className="flex items-center space-x-2">
-          <Shield className="w-3.5 h-3.5 text-amber-300" />
-          <span>ESTADO DO MARANHÃO • POLÍCIA MILITAR DO MARANHÃO (PMMA)</span>
+      <div className="bg-[#005a2b] text-white px-3 sm:px-4 py-1.5 text-xs font-semibold flex items-center justify-between tracking-wide gap-2 w-full max-w-full overflow-hidden">
+        <div className="flex items-center space-x-1.5 min-w-0 truncate">
+          <Shield className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+          <span className="truncate text-[10px] sm:text-xs">ESTADO DO MARANHÃO • POLÍCIA MILITAR DO MARANHÃO (PMMA)</span>
         </div>
-        <div className="flex items-center space-x-4">
-          <span className="flex items-center space-x-1">
+        <div className="flex items-center space-x-2 text-[10px] sm:text-xs flex-shrink-0">
+          <span className="hidden md:flex items-center space-x-1">
             <Building2 className="w-3.5 h-3.5 text-emerald-300" />
             <span className="text-emerald-100">{topCommand.sede}</span>
           </span>
-          <span className="hidden md:flex items-center space-x-1">
-            <Phone className="w-3.5 h-3.5 text-emerald-300" />
-            <span className="text-emerald-100">{topCommand.contato}</span>
-          </span>
-          <span className="flex items-center space-x-1 bg-[#004722] px-2 py-0.5 rounded text-[11px]">
+          <span className="flex items-center space-x-1 bg-[#004722] px-2 py-0.5 rounded text-[10px] sm:text-[11px] whitespace-nowrap">
             <Clock className="w-3 h-3 text-amber-300" />
-            <span>Última atualização: {topCommand.dataAtualizacao}</span>
+            <span>{topCommand.dataAtualizacao}</span>
           </span>
         </div>
       </div>
 
       {/* Main Header Container */}
-      <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Emblem & Title */}
-        <div className="flex items-center space-x-3.5">
+        <div className="flex items-center space-x-3">
           <div className="relative group flex-shrink-0">
             <img
               src="/assets/aistudio/CPI_8bc02a05.jpg"
               alt="Emblema Oficial CPI PMMA"
-              className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-md rounded border border-slate-200 bg-white p-1"
+              className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-md rounded border border-slate-200 bg-white p-1"
             />
             <div className="absolute -bottom-1 -right-1 bg-[#005a2b] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full border border-white">
               2026
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <div className="flex items-center space-x-2">
-              <h1 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase truncate">
                 {topCommand.titulo}
               </h1>
-              <span className="bg-emerald-100 text-[#005a2b] text-xs font-bold px-2 py-0.5 rounded border border-emerald-300 uppercase">
+              <span className="bg-emerald-100 text-[#005a2b] text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded border border-emerald-300 uppercase">
                 Oficial
               </span>
             </div>
-            <p className="text-xs md:text-sm font-bold text-[#005a2b] uppercase tracking-wide">
+            <p className="text-[11px] sm:text-xs md:text-sm font-bold text-[#005a2b] uppercase tracking-wide truncate">
               {topCommand.subtitulo}
             </p>
-            <p className="text-xs text-slate-600 font-medium">
-              Comandante Geral: <strong className="text-slate-800">{topCommand.comandanteGeral}</strong> • Comandante CPI: <strong className="text-slate-800">{topCommand.comandanteCPI}</strong>
+            <p className="text-[10px] sm:text-xs text-slate-600 font-medium truncate">
+              Cmdte Geral: <strong className="text-slate-800">{topCommand.comandanteGeral}</strong> • CPI: <strong className="text-slate-800">{topCommand.comandanteCPI}</strong>
             </p>
           </div>
         </div>
 
         {/* Search & Actions Bar */}
-        <div className="flex flex-col sm:flex-row flex-wrap sm:items-center gap-2">
+        <div className="flex flex-col gap-2 w-full md:w-auto">
           {/* Smart Search Bar & Quick Filters */}
-          <div className="flex flex-col gap-1 sm:w-72 md:w-80">
+          <div className="flex flex-col gap-1 w-full md:w-80">
             <div className="relative">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -147,7 +143,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Quick CPAI Pills (Instant 1-tap navigation) */}
-            <div className="flex items-center gap-1 overflow-x-auto py-0.5 no-scrollbar">
+            <div className="flex items-center gap-1 overflow-x-auto py-0.5 no-scrollbar w-full">
               <span className="text-[10px] text-slate-500 font-bold whitespace-nowrap">Comandos:</span>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
                 const targetSigla = `CPAI-${num}`;
@@ -171,26 +167,30 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Export tools with Dual-Version Dropdowns (Modelo Anexo vs Relatório Cadastral) */}
-          <div className="flex items-center space-x-1.5 border-l border-slate-200 pl-2 export-menu-container">
-            {/* PDF Dropdown */}
-            <div className="relative">
+          {/* Action Tools & Role Switcher */}
+          <div className="flex items-center justify-between sm:justify-end gap-1.5 w-full export-menu-container">
+            {/* PDF Button: Opens modal directly on mobile for zero clipping; dropdown on desktop */}
+            <div className="relative flex-1 sm:flex-initial">
               <button
                 onClick={() => {
-                  setPdfMenuOpen(!pdfMenuOpen);
-                  setPngMenuOpen(false);
+                  if (window.innerWidth < 640) {
+                    onOpenExportModal('pdf');
+                  } else {
+                    setPdfMenuOpen(!pdfMenuOpen);
+                    setPngMenuOpen(false);
+                  }
                 }}
                 disabled={isExporting}
-                title="Opções de Download em PDF"
-                className="flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-300 rounded shadow-xs transition-colors"
+                title="Opções de Download em PDF (2 Versões)"
+                className="w-full sm:w-auto flex items-center justify-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-300 rounded shadow-xs transition-colors"
               >
                 <FileDown className="w-3.5 h-3.5 text-rose-600" />
                 <span>PDF</span>
-                <ChevronDown className="w-3 h-3 text-rose-600" />
+                <ChevronDown className="w-3 h-3 text-rose-600 hidden sm:inline" />
               </button>
 
               {pdfMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-64 bg-white border-2 border-black rounded-lg shadow-xl z-50 p-1.5 animate-in fade-in text-left">
+                <div className="hidden sm:block absolute right-0 top-full mt-1 w-64 bg-white border-2 border-black rounded-lg shadow-xl z-50 p-1.5 animate-in fade-in text-left">
                   <div className="px-2 py-1 text-[10px] font-black uppercase text-slate-500 border-b border-slate-100">
                     Selecione a Versão do PDF:
                   </div>
@@ -247,24 +247,28 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* PNG Dropdown */}
-            <div className="relative">
+            {/* PNG Button: Opens modal directly on mobile for zero clipping; dropdown on desktop */}
+            <div className="relative flex-1 sm:flex-initial">
               <button
                 onClick={() => {
-                  setPngMenuOpen(!pngMenuOpen);
-                  setPdfMenuOpen(false);
+                  if (window.innerWidth < 640) {
+                    onOpenExportModal('png');
+                  } else {
+                    setPngMenuOpen(!pngMenuOpen);
+                    setPdfMenuOpen(false);
+                  }
                 }}
                 disabled={isExporting}
                 title="Opções de Download em Imagem PNG"
-                className="flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded shadow-xs transition-colors"
+                className="w-full sm:w-auto flex items-center justify-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded shadow-xs transition-colors"
               >
                 <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
                 <span>PNG</span>
-                <ChevronDown className="w-3 h-3 text-blue-600" />
+                <ChevronDown className="w-3 h-3 text-blue-600 hidden sm:inline" />
               </button>
 
               {pngMenuOpen && (
-                <div className="absolute right-0 top-full mt-1 w-64 bg-white border-2 border-black rounded-lg shadow-xl z-50 p-1.5 animate-in fade-in text-left">
+                <div className="hidden sm:block absolute right-0 top-full mt-1 w-64 bg-white border-2 border-black rounded-lg shadow-xl z-50 p-1.5 animate-in fade-in text-left">
                   <div className="px-2 py-1 text-[10px] font-black uppercase text-slate-500 border-b border-slate-100">
                     Selecione a Versão da Imagem:
                   </div>
@@ -321,50 +325,50 @@ export const Header: React.FC<HeaderProps> = ({
               )}
             </div>
 
-            {/* Direct Central Modal Opener */}
+            {/* Direct Export Modal Opener */}
             <button
               onClick={() => onOpenExportModal('all')}
               disabled={isExporting}
               title="Central de Exportação (Comparar as duas versões)"
-              className="hidden sm:flex items-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-white bg-[#005a2b] hover:bg-[#004722] rounded shadow-xs transition-colors"
+              className="flex items-center justify-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-white bg-[#005a2b] hover:bg-[#004722] rounded shadow-xs transition-colors whitespace-nowrap"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Exportar</span>
+              <span className="hidden sm:inline">Exportar</span>
             </button>
 
             {/* Print Button */}
             <button
               onClick={onPrint}
               title="Imprimir Organograma"
-              className="flex items-center space-x-1 px-2 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded shadow-xs transition-colors"
+              className="hidden sm:flex items-center px-2 py-1.5 text-xs font-semibold text-slate-700 bg-white hover:bg-slate-100 border border-slate-300 rounded shadow-xs transition-colors"
             >
               <Printer className="w-3.5 h-3.5 text-slate-600" />
             </button>
-          </div>
 
-          {/* User Role Switcher */}
-          <div className="border-l border-slate-200 pl-2">
-            <button
-              onClick={onToggleRole}
-              title={`Perfil Atual: ${role}. Clique para alterar.`}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold rounded shadow-xs transition-all ${
-                role === 'ADMINISTRADOR'
-                  ? 'bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200'
-                  : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
-              }`}
-            >
-              {role === 'ADMINISTRADOR' ? (
-                <>
-                  <Unlock className="w-3.5 h-3.5 text-amber-700" />
-                  <span>ADMINISTRADOR</span>
-                </>
-              ) : (
-                <>
-                  <Lock className="w-3.5 h-3.5 text-slate-600" />
-                  <span>CONSULTA</span>
-                </>
-              )}
-            </button>
+            {/* User Role Switcher */}
+            <div className="flex-shrink-0">
+              <button
+                onClick={onToggleRole}
+                title={`Perfil Atual: ${role}. Clique para alterar.`}
+                className={`flex items-center space-x-1 px-2 sm:px-3 py-1.5 text-xs font-bold rounded shadow-xs transition-all whitespace-nowrap ${
+                  role === 'ADMINISTRADOR'
+                    ? 'bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200'
+                    : 'bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200'
+                }`}
+              >
+                {role === 'ADMINISTRADOR' ? (
+                  <>
+                    <Unlock className="w-3.5 h-3.5 text-amber-700 flex-shrink-0" />
+                    <span>ADMIN</span>
+                  </>
+                ) : (
+                  <>
+                    <Lock className="w-3.5 h-3.5 text-slate-600 flex-shrink-0" />
+                    <span>CONSULTA</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>

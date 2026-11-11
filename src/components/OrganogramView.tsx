@@ -169,86 +169,92 @@ export const OrganogramView: React.FC<OrganogramViewProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-slate-100">
-      {/* Control Bar: Filters, View Modes & Zoom */}
-      <div className="bg-white border-b border-slate-300 px-3 md:px-4 py-2.5 flex flex-wrap items-center justify-between gap-2.5 shadow-xs print:hidden">
-        {/* Left: Filters & Mobile View Switcher */}
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Control Bar: Filters, View Modes & Zoom (Optimized for Mobile & Desktop) */}
+      <div className="bg-white border-b border-slate-300 px-3 sm:px-4 py-2 sm:py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 shadow-xs print:hidden w-full max-w-full overflow-hidden">
+        {/* Row 1 on mobile: View mode switcher (Full width on mobile, auto on desktop) */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
           {/* Mobile vs Desktop View Toggle Buttons */}
-          <div className="flex items-center bg-slate-100 p-0.5 rounded border border-slate-300 text-xs font-bold">
+          <div className="grid grid-cols-2 sm:flex sm:items-center bg-slate-100 p-0.5 rounded-lg border border-slate-300 text-xs font-bold w-full sm:w-auto">
             <button
               onClick={() => {
                 setViewMode('mobile-tree');
                 setZoomLevel(100);
               }}
               title="Organograma Vertical Conectado (Ideal para celulares e tablets)"
-              className={`px-2.5 py-1 rounded flex items-center space-x-1.5 transition-colors ${
+              className={`px-3 py-1.5 sm:py-1 rounded-md flex items-center justify-center space-x-1.5 transition-colors ${
                 viewMode === 'mobile-tree' ? 'bg-[#005a2b] text-white shadow-xs font-black' : 'text-slate-700 hover:text-slate-900'
               }`}
             >
-              <Smartphone className="w-3.5 h-3.5" />
-              <span>Mobile Vertical</span>
+              <Smartphone className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">Mobile Vertical</span>
             </button>
 
             <button
-              onClick={() => setViewMode('pdf-exact')}
+              onClick={() => {
+                setViewMode('pdf-exact');
+                handleFitScreen();
+              }}
               title="Organograma Oficial 9 Colunas Idêntico ao PDF"
-              className={`px-2.5 py-1 rounded flex items-center space-x-1.5 transition-colors ${
+              className={`px-3 py-1.5 sm:py-1 rounded-md flex items-center justify-center space-x-1.5 transition-colors ${
                 viewMode === 'pdf-exact' ? 'bg-[#005a2b] text-white shadow-xs font-black' : 'text-slate-700 hover:text-slate-900'
               }`}
             >
-              <Layers className="w-3.5 h-3.5" />
-              <span>9 Colunas (PDF)</span>
+              <Layers className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">9 Colunas (PDF)</span>
             </button>
           </div>
 
-          {/* Grand Command Filter */}
-          <select
-            value={selectedCommandId || 'TODOS'}
-            onChange={(e) => onSelectCommand(e.target.value === 'TODOS' ? null : e.target.value)}
-            className="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-800 focus:ring-2 focus:ring-[#005a2b] focus:outline-none"
-          >
-            <option value="TODOS">Todos os Grandes Comandos</option>
-            {commands.map(cmd => (
-              <option key={cmd.id} value={cmd.id}>
-                {cmd.sigla} - {cmd.comandante} ({cmd.municipioSede})
-              </option>
-            ))}
-          </select>
-
-          {/* Unit Type Filter */}
-          <div className="hidden sm:flex items-center bg-slate-100 p-0.5 rounded border border-slate-300 text-xs font-semibold">
-            {['TODOS', 'BPM', 'ESPECIAL'].map((type) => (
-              <button
-                key={type}
-                onClick={() => setSelectedTypeFilter(type)}
-                className={`px-2 py-0.5 rounded transition-colors ${
-                  selectedTypeFilter === type
-                    ? 'bg-[#005a2b] text-white shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-
-          {(selectedCommandId || selectedTypeFilter !== 'TODOS' || selectedCityFilter !== 'TODOS') && (
-            <button
-              onClick={() => {
-                onSelectCommand(null);
-                setSelectedTypeFilter('TODOS');
-                setSelectedCityFilter('TODOS');
-              }}
-              className="text-xs font-bold text-rose-600 hover:text-rose-800 underline px-1"
+          {/* Row 2 on mobile: Filters & Select Command */}
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+            {/* Grand Command Filter */}
+            <select
+              value={selectedCommandId || 'TODOS'}
+              onChange={(e) => onSelectCommand(e.target.value === 'TODOS' ? null : e.target.value)}
+              className="text-xs font-semibold bg-slate-50 border border-slate-300 rounded px-2 py-1.5 sm:py-1 text-slate-800 focus:ring-2 focus:ring-[#005a2b] focus:outline-none flex-1 sm:flex-initial min-w-0 truncate"
             >
-              Limpar Filtros
-            </button>
-          )}
+              <option value="TODOS">Todos os Grandes Comandos</option>
+              {commands.map(cmd => (
+                <option key={cmd.id} value={cmd.id}>
+                  {cmd.sigla} - {cmd.comandante} ({cmd.municipioSede})
+                </option>
+              ))}
+            </select>
+
+            {/* Unit Type Filter (Desktop only) */}
+            <div className="hidden md:flex items-center bg-slate-100 p-0.5 rounded border border-slate-300 text-xs font-semibold">
+              {['TODOS', 'BPM', 'ESPECIAL'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setSelectedTypeFilter(type)}
+                  className={`px-2 py-0.5 rounded transition-colors ${
+                    selectedTypeFilter === type
+                      ? 'bg-[#005a2b] text-white shadow-xs font-bold'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+
+            {(selectedCommandId || selectedTypeFilter !== 'TODOS' || selectedCityFilter !== 'TODOS') && (
+              <button
+                onClick={() => {
+                  onSelectCommand(null);
+                  setSelectedTypeFilter('TODOS');
+                  setSelectedCityFilter('TODOS');
+                }}
+                className="text-[11px] sm:text-xs font-bold text-rose-600 hover:text-rose-800 underline px-1 whitespace-nowrap flex-shrink-0"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Right: Layout Switcher & Zoom Controls */}
-        <div className="flex items-center space-x-2">
-          {/* Additional layout modes for desktop */}
+        {/* Right: Layout Switcher (Desktop) & Zoom Controls (Only when relevant or in 9 colunas) */}
+        <div className="flex items-center justify-between sm:justify-end gap-1.5 w-full sm:w-auto">
+          {/* Additional layout modes for large desktop */}
           <div className="hidden lg:flex items-center bg-slate-100 p-0.5 rounded border border-slate-300 text-xs font-semibold">
             <button
               onClick={() => setViewMode('columns')}
@@ -284,46 +290,48 @@ export const OrganogramView: React.FC<OrganogramViewProps> = ({
             </button>
           </div>
 
-          {/* Zoom controls (especially useful in 9 Colunas mode) */}
-          <div className="flex items-center space-x-1 bg-white border border-slate-300 rounded px-1.5 py-1">
-            <button
-              onClick={handleZoomOut}
-              title="Reduzir Zoom (-)"
-              className="p-1 hover:bg-slate-100 rounded text-slate-700"
-            >
-              <ZoomOut className="w-3.5 h-3.5" />
-            </button>
-            <span className="text-[11px] font-bold text-slate-800 w-9 text-center select-none">
-              {zoomLevel}%
-            </span>
-            <button
-              onClick={handleZoomIn}
-              title="Aumentar Zoom (+)"
-              className="p-1 hover:bg-slate-100 rounded text-slate-700"
-            >
-              <ZoomIn className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleResetZoom}
-              title="Zoom Padrão (100%)"
-              className="p-1 hover:bg-slate-100 rounded text-slate-500"
-            >
-              <RotateCcw className="w-3 h-3" />
-            </button>
-            <button
-              onClick={handleFitScreen}
-              title="Ajustar à Largura da Tela"
-              className="p-1 hover:bg-slate-100 rounded text-slate-500"
-            >
-              <Maximize2 className="w-3 h-3" />
-            </button>
-          </div>
+          {/* Zoom controls: Show when in pdf-exact mode, hide during mobile-tree mode */}
+          {viewMode === 'pdf-exact' && (
+            <div className="flex items-center space-x-1 bg-white border border-slate-300 rounded px-1.5 py-1 flex-shrink-0">
+              <button
+                onClick={handleZoomOut}
+                title="Reduzir Zoom (-)"
+                className="p-1 hover:bg-slate-100 rounded text-slate-700"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <span className="text-[11px] font-bold text-slate-800 w-8 text-center select-none">
+                {zoomLevel}%
+              </span>
+              <button
+                onClick={handleZoomIn}
+                title="Aumentar Zoom (+)"
+                className="p-1 hover:bg-slate-100 rounded text-slate-700"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={handleResetZoom}
+                title="Zoom Padrão (100%)"
+                className="p-1 hover:bg-slate-100 rounded text-slate-500 hidden sm:block"
+              >
+                <RotateCcw className="w-3 h-3" />
+              </button>
+              <button
+                onClick={handleFitScreen}
+                title="Ajustar à Tela"
+                className="p-1 hover:bg-slate-100 rounded text-slate-500"
+              >
+                <Maximize2 className="w-3 h-3" />
+              </button>
+            </div>
+          )}
 
           {/* Admin Add Unit */}
           {role === 'ADMINISTRADOR' && (
             <button
               onClick={() => onAddUnit(selectedCommandId || undefined)}
-              className="flex items-center space-x-1 px-2.5 py-1.5 bg-[#005a2b] hover:bg-[#004722] text-white text-xs font-bold rounded shadow-xs transition-colors"
+              className="flex items-center space-x-1 px-2.5 py-1.5 bg-[#005a2b] hover:bg-[#004722] text-white text-xs font-bold rounded shadow-xs transition-colors flex-shrink-0 ml-auto sm:ml-0"
             >
               <Plus className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Nova Unidade</span>
@@ -407,9 +415,10 @@ export const OrganogramView: React.FC<OrganogramViewProps> = ({
                     {/* Grand Command Node Card */}
                     <div className="w-full bg-white border-2 border-black rounded-lg shadow-md overflow-hidden transition-all hover:border-[#005a2b]">
                       {/* Emblem Positioned in the Center Above Command Info */}
-                      <div className="bg-slate-50 py-2.5 px-3 border-b border-slate-200 flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-14 h-14 bg-white border border-slate-300 rounded shadow-xs p-1 flex items-center justify-center flex-shrink-0">
+                      {/* Emblem & Grand Command Info */}
+                      <div className="bg-slate-50 py-2.5 px-3 border-b border-slate-200 flex items-center justify-between gap-2">
+                        <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white border border-slate-300 rounded shadow-xs p-1 flex items-center justify-center flex-shrink-0">
                             {command.emblemaUrl ? (
                               <img 
                                 src={command.emblemaUrl} 
@@ -420,22 +429,22 @@ export const OrganogramView: React.FC<OrganogramViewProps> = ({
                               <span className="text-[9px] font-bold text-slate-400">Sem Emblema</span>
                             )}
                           </div>
-                          <div>
-                            <div className="flex items-center space-x-1.5">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center space-x-1.5 flex-wrap">
                               <h3 className="font-black text-sm sm:text-base text-slate-900 uppercase">
                                 {command.sigla}
                               </h3>
-                              <span className="text-[10px] font-bold bg-[#005a2b] text-white px-2 py-0.5 rounded">
+                              <span className="text-[10px] font-bold bg-[#005a2b] text-white px-2 py-0.2 rounded whitespace-nowrap">
                                 {cmdUnits.length} Unidades
                               </span>
                             </div>
-                            <p className="font-extrabold text-xs text-[#005a2b] uppercase">
+                            <p className="font-extrabold text-xs text-[#005a2b] uppercase truncate">
                               {command.comandante}
                             </p>
-                            <p className="text-[11px] text-slate-600 flex items-center space-x-2 mt-0.5">
-                              <span>Sede: <strong>{command.municipioSede}</strong></span>
+                            <p className="text-[11px] text-slate-600 flex items-center space-x-1.5 mt-0.5 flex-wrap">
+                              <span className="truncate">Sede: <strong>{command.municipioSede}</strong></span>
                               <span>•</span>
-                              <a href={`tel:${command.telefone.replace(/\D/g, '')}`} className="font-mono text-[#005a2b] font-bold hover:underline">
+                              <a href={`tel:${command.telefone.replace(/\D/g, '')}`} className="font-mono text-[#005a2b] font-bold hover:underline whitespace-nowrap">
                                 {command.telefone}
                               </a>
                             </p>
@@ -445,7 +454,7 @@ export const OrganogramView: React.FC<OrganogramViewProps> = ({
                         {/* Expand / Collapse Button */}
                         <button
                           onClick={() => toggleCommandCollapse(command.id)}
-                          className="p-2 hover:bg-slate-200 rounded-full text-slate-600"
+                          className="p-1.5 sm:p-2 hover:bg-slate-200 rounded-full text-slate-600 flex-shrink-0"
                           title={isCollapsed ? 'Expandir Unidades' : 'Recolher Unidades'}
                         >
                           {isCollapsed ? <ChevronDown className="w-5 h-5" /> : <ChevronUp className="w-5 h-5" />}
