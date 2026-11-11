@@ -27,7 +27,7 @@ interface HeaderProps {
   onExportCadastralPdf: () => void;
   onExportVisualPng: () => void;
   onExportCadastralPng: () => void;
-  onOpenExportModal: (format?: 'all' | 'pdf' | 'png') => void;
+  onOpenExportModal: (format?: 'all' | 'pdf' | 'png' | 'formato1' | 'formato2' | 'formato3') => void;
   onPrint: () => void;
   searchTerm: string;
   onSearchChange: (value: string) => void;
@@ -192,7 +192,7 @@ export const Header: React.FC<HeaderProps> = ({
               {pdfMenuOpen && (
                 <div className="hidden sm:block absolute right-0 top-full mt-1 w-64 bg-white border-2 border-black rounded-lg shadow-xl z-50 p-1.5 animate-in fade-in text-left">
                   <div className="px-2 py-1 text-[10px] font-black uppercase text-slate-500 border-b border-slate-100">
-                    Selecione a Versão do PDF:
+                    Selecione o Formato em PDF:
                   </div>
 
                   <button
@@ -205,11 +205,11 @@ export const Header: React.FC<HeaderProps> = ({
                     <Layers className="w-4 h-4 text-[#005a2b] flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="text-xs font-black text-slate-900 group-hover:text-[#005a2b] flex items-center space-x-1">
-                        <span>Modelo Gráfico (Anexo)</span>
-                        <span className="text-[9px] bg-emerald-100 text-[#005a2b] px-1 py-0.2 rounded font-bold">Oficial</span>
+                        <span>FORMATO I (PDF)</span>
+                        <span className="text-[9px] bg-emerald-100 text-[#005a2b] px-1 py-0.2 rounded font-bold">Print 01</span>
                       </div>
                       <p className="text-[10px] text-slate-500 font-medium leading-tight">
-                        Prancha visual de 9 colunas idêntica ao PDF anexado
+                        Organograma Gráfico Oficial 2026 em 9 colunas
                       </p>
                     </div>
                   </button>
@@ -223,11 +223,12 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <FileText className="w-4 h-4 text-slate-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-xs font-bold text-slate-900 group-hover:text-slate-950">
-                        Relatório Cadastral (Existente)
+                      <div className="text-xs font-black text-slate-900 group-hover:text-slate-950 flex items-center space-x-1">
+                        <span>FORMATO II (PDF)</span>
+                        <span className="text-[9px] bg-slate-200 text-slate-800 px-1 py-0.2 rounded font-bold">Print 02</span>
                       </div>
                       <p className="text-[10px] text-slate-500 font-medium leading-tight">
-                        Relatório administrativo multipágina com listagem completa
+                        Relatório Estatístico e Cadastral tabular
                       </p>
                     </div>
                   </button>
@@ -236,11 +237,11 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       onClick={() => {
                         setPdfMenuOpen(false);
-                        onOpenExportModal('pdf');
+                        onOpenExportModal('formato1');
                       }}
                       className="w-full py-1 px-2 text-center text-[10px] font-bold text-[#005a2b] hover:underline"
                     >
-                      Ver comparativo e detalhes...
+                      Abrir Central de Exportação...
                     </button>
                   </div>
                 </div>
@@ -252,25 +253,25 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 onClick={() => {
                   if (window.innerWidth < 640) {
-                    onOpenExportModal('png');
+                    onOpenExportModal('formato3');
                   } else {
                     setPngMenuOpen(!pngMenuOpen);
                     setPdfMenuOpen(false);
                   }
                 }}
                 disabled={isExporting}
-                title="Opções de Download em Imagem PNG"
+                title="FORMATO III: Opções de Download em Imagem PNG"
                 className="w-full sm:w-auto flex items-center justify-center space-x-1 px-2.5 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded shadow-xs transition-colors"
               >
                 <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
-                <span>PNG</span>
+                <span>FORMATO III (PNG)</span>
                 <ChevronDown className="w-3 h-3 text-blue-600 hidden sm:inline" />
               </button>
 
               {pngMenuOpen && (
                 <div className="hidden sm:block absolute right-0 top-full mt-1 w-64 bg-white border-2 border-black rounded-lg shadow-xl z-50 p-1.5 animate-in fade-in text-left">
                   <div className="px-2 py-1 text-[10px] font-black uppercase text-slate-500 border-b border-slate-100">
-                    Selecione a Versão da Imagem:
+                    FORMATO III – Download em Imagem:
                   </div>
 
                   <button
@@ -283,11 +284,11 @@ export const Header: React.FC<HeaderProps> = ({
                     <Layers className="w-4 h-4 text-[#005a2b] flex-shrink-0 mt-0.5" />
                     <div>
                       <div className="text-xs font-black text-slate-900 group-hover:text-[#005a2b] flex items-center space-x-1">
-                        <span>Modelo Gráfico (Anexo)</span>
-                        <span className="text-[9px] bg-blue-100 text-blue-800 px-1 py-0.2 rounded font-bold">2400px</span>
+                        <span>FORMATO I em Imagem</span>
+                        <span className="text-[9px] bg-blue-100 text-blue-800 px-1 py-0.2 rounded font-bold">Print 01</span>
                       </div>
                       <p className="text-[10px] text-slate-500 font-medium leading-tight">
-                        Imagem em altíssima resolução da prancha de 9 colunas
+                        Imagem da prancha visual do organograma
                       </p>
                     </div>
                   </button>
@@ -301,11 +302,12 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <FileText className="w-4 h-4 text-slate-600 flex-shrink-0 mt-0.5" />
                     <div>
-                      <div className="text-xs font-bold text-slate-900 group-hover:text-slate-950">
-                        Relatório Cadastral (Existente)
+                      <div className="text-xs font-black text-slate-900 group-hover:text-slate-950 flex items-center space-x-1">
+                        <span>FORMATO II em Imagem</span>
+                        <span className="text-[9px] bg-blue-100 text-blue-800 px-1 py-0.2 rounded font-bold">Print 02</span>
                       </div>
                       <p className="text-[10px] text-slate-500 font-medium leading-tight">
-                        Imagem do relatório cadastral administrativo
+                        Imagem do relatório cadastral tabular
                       </p>
                     </div>
                   </button>
@@ -314,11 +316,11 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       onClick={() => {
                         setPngMenuOpen(false);
-                        onOpenExportModal('png');
+                        onOpenExportModal('formato3');
                       }}
                       className="w-full py-1 px-2 text-center text-[10px] font-bold text-[#005a2b] hover:underline"
                     >
-                      Ver comparativo e detalhes...
+                      Ver detalhes e resoluções...
                     </button>
                   </div>
                 </div>

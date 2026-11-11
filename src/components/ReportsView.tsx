@@ -173,24 +173,24 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
           </div>
         )}
 
-        {/* DUAL VERSION CARDS (Modelo Anexo vs Relatório Cadastral) */}
+        {/* FORMATO I, FORMATO II & FORMATO III CARDS */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Card 1: Modelo Gráfico Oficial (PDF Anexo) */}
+          {/* Card 1: FORMATO I – Modelo Gráfico Oficial (Print 01) */}
           <div className="bg-emerald-50/60 border-2 border-[#005a2b] rounded-lg p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 border-b border-emerald-200">
                 <div className="flex items-center space-x-2">
                   <Layers className="w-4 h-4 text-[#005a2b]" />
                   <span className="font-black text-xs text-slate-900 uppercase">
-                    Versão 1: Modelo Gráfico Oficial (PDF Anexo)
+                    FORMATO I – Organograma Gráfico Oficial (PDF)
                   </span>
                 </div>
                 <span className="bg-[#005a2b] text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">
-                  Modelo Anexo
+                  Print 01
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Prancha visual panorâmica idêntica ao documento PDF anexado, com 9 colunas completas, todos os emblemas institucionais, caixas hierárquicas, bloco CPE e quadro de Comandantes de Área.
+                Prancha visual panorâmica oficial em 9 colunas com os dados atualizados do sistema (conforme visualizado no computador - Print 01), com todos os Grandes Comandos, unidades subordinadas, comandantes, contatos e emblemas.
               </p>
             </div>
 
@@ -201,7 +201,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
                 className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
               >
                 <FileDown className="w-3.5 h-3.5" />
-                <span>Baixar PDF (Prancha Oficial)</span>
+                <span>Baixar FORMATO I (PDF)</span>
               </button>
 
               <button
@@ -210,7 +210,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
                 className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
               >
                 <ImageIcon className="w-3.5 h-3.5" />
-                <span>Baixar Imagem PNG</span>
+                <span>FORMATO I em Imagem (PNG)</span>
               </button>
 
               <button
@@ -224,22 +224,22 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
             </div>
           </div>
 
-          {/* Card 2: Relatório Cadastral Operacional (Versão Existente) */}
+          {/* Card 2: FORMATO II – Relatório Estatístico e Cadastral (Print 02) */}
           <div className="bg-slate-50 border-2 border-slate-300 rounded-lg p-4 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                 <div className="flex items-center space-x-2">
                   <FileText className="w-4 h-4 text-slate-700" />
                   <span className="font-black text-xs text-slate-900 uppercase">
-                    Versão 2: Relatório Cadastral (Existente)
+                    FORMATO II – Relatório Estatístico e Cadastral (PDF)
                   </span>
                 </div>
                 <span className="bg-slate-700 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">
-                  Cadastral
+                  Print 02
                 </span>
               </div>
               <p className="text-xs text-slate-600 mt-2 leading-relaxed">
-                Relatório analítico multipágina tabular para despacho administrativo, contendo catálogo completo de unidades, distribuição regional, municípios, comandantes, telefones e e-mails.
+                Relatório executivo multipágina com diagramação tabular oficial da PMMA (conforme Print 02), catálogo de unidades por Grande Comando, cidades sede, comandantes, telefones e e-mails.
               </p>
             </div>
 
@@ -250,7 +250,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
                 className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
               >
                 <FileDown className="w-3.5 h-3.5" />
-                <span>Baixar PDF (Relatório Cadastral)</span>
+                <span>Baixar FORMATO II (PDF)</span>
               </button>
 
               <button
@@ -259,7 +259,7 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
                 className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
               >
                 <ImageIcon className="w-3.5 h-3.5" />
-                <span>Baixar Imagem PNG</span>
+                <span>FORMATO II em Imagem (PNG)</span>
               </button>
             </div>
           </div>

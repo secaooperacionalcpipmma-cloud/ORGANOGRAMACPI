@@ -9,9 +9,10 @@ interface OfficialPdfModelSheetProps {
 }
 
 /**
- * Official Visual Sheet Component - Exact Replica of the Attached PDF
- * Designed specifically for high-resolution visual capture (PDF & PNG)
- * and 1-page landscape presentation.
+ * Official Visual Sheet Component - Exact Replica of Print 01 (Desktop View)
+ * Generates the official 9-columns visual organogram using live database data.
+ * All colors are explicitly styled with standard hex codes to ensure 100% compatibility
+ * with html2canvas and jsPDF (zero oklch errors).
  */
 export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
   database,
@@ -26,143 +27,394 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
   return (
     <div
       id={id}
-      className={`bg-white text-slate-900 font-sans p-6 select-none ${className}`}
-      style={{ width: '1580px', minHeight: '1000px', margin: '0 auto', backgroundColor: '#ffffff', color: '#0f172a' }}
+      className={`font-sans select-none ${className}`}
+      style={{
+        width: '1580px',
+        minWidth: '1580px',
+        backgroundColor: '#ffffff',
+        color: '#0f172a',
+        padding: '24px',
+        margin: '0 auto',
+        boxSizing: 'border-box'
+      }}
     >
-      {/* 1. Header with Title and Emblems on Left/Right corners identical to PDF */}
-      <div className="flex items-center justify-between pb-3 border-b-2 border-[#005a2b] mb-3">
-        {/* Left Official Shield */}
-        <div className="w-20 h-20 bg-white border border-slate-300 rounded shadow-2xs p-1 flex items-center justify-center">
+      {/* 1. Top Header - Exact replica of Print 01 (Left CPI emblem, title, badge, commanders) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          gap: '16px',
+          paddingBottom: '16px',
+          borderBottom: '3px solid #005a2b',
+          marginBottom: '14px'
+        }}
+      >
+        {/* Left Official Shield CPI 2026 */}
+        <div
+          style={{
+            position: 'relative',
+            width: '80px',
+            height: '80px',
+            backgroundColor: '#ffffff',
+            border: '1px solid #cbd5e1',
+            borderRadius: '6px',
+            padding: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}
+        >
           <img
             src="/assets/aistudio/CPI_8bc02a05.jpg"
             alt="Emblema CPI PMMA"
-            className="max-h-full max-w-full object-contain"
+            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
           />
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '-4px',
+              right: '-4px',
+              backgroundColor: '#005a2b',
+              color: '#ffffff',
+              fontSize: '9px',
+              fontWeight: 900,
+              padding: '1px 6px',
+              borderRadius: '9999px',
+              border: '1px solid #ffffff'
+            }}
+          >
+            2026
+          </div>
         </div>
 
-        {/* Center Main Title */}
-        <div className="text-center flex-1 px-4">
-          <h1 className="text-3xl font-black text-[#005a2b] tracking-wider uppercase font-sans">
-            ORGANOGRAMA CPI 2026
-          </h1>
-          <p className="text-xs font-bold text-slate-700 tracking-wide mt-0.5">
-            POLÍCIA MILITAR DO MARANHÃO • COMANDO DO POLICIAMENTO DO INTERIOR
-          </p>
-          <p className="text-[11px] text-slate-600 font-medium">
-            Comandante Geral: <strong className="text-slate-800">{topCommand.comandanteGeral}</strong> • Comandante CPI: <strong className="text-slate-800">{topCommand.comandanteCPI}</strong> • Tel CPI: <strong className="text-slate-800">{topCommand.contato}</strong>
-          </p>
-        </div>
+        {/* Header Text Block */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <h1
+              style={{
+                fontSize: '28px',
+                fontWeight: 900,
+                color: '#0f172a',
+                letterSpacing: '-0.02em',
+                textTransform: 'uppercase',
+                margin: 0
+              }}
+            >
+              {topCommand.titulo || 'ORGANOGRAMA CPI 2026'}
+            </h1>
+            <span
+              style={{
+                backgroundColor: '#d1fae5',
+                color: '#005a2b',
+                fontSize: '11px',
+                fontWeight: 900,
+                padding: '2px 8px',
+                borderRadius: '4px',
+                border: '1px solid #6ee7b7',
+                textTransform: 'uppercase'
+              }}
+            >
+              OFICIAL
+            </span>
+          </div>
 
-        {/* Right Official Shield */}
-        <div className="w-20 h-20 bg-white border border-slate-300 rounded shadow-2xs p-1 flex items-center justify-center">
-          <img
-            src="/assets/aistudio/CPI_8bc02a05.jpg"
-            alt="Emblema CPI PMMA"
-            className="max-h-full max-w-full object-contain"
-          />
+          <p
+            style={{
+              fontSize: '13px',
+              fontWeight: 900,
+              color: '#005a2b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              margin: '2px 0 0 0'
+            }}
+          >
+            {topCommand.subtitulo || 'COMANDO DO POLICIAMENTO DO INTERIOR (CPI)'}
+          </p>
+
+          <p
+            style={{
+              fontSize: '11px',
+              fontWeight: 500,
+              color: '#475569',
+              margin: '3px 0 0 0'
+            }}
+          >
+            Comandante Geral: <strong style={{ color: '#0f172a', fontWeight: 800 }}>{topCommand.comandanteGeral}</strong> • Comandante CPI: <strong style={{ color: '#0f172a', fontWeight: 800 }}>{topCommand.comandanteCPI}</strong>
+            {topCommand.contato && (
+              <span> • Tel CPI: <strong style={{ color: '#005a2b', fontWeight: 800 }}>{topCommand.contato}</strong></span>
+            )}
+          </p>
         </div>
       </div>
 
-      {/* 2. Green Horizontal Connection Bar */}
-      <div className="relative mb-3">
-        <div className="h-2 bg-[#005a2b] rounded-full w-full"></div>
+      {/* 2. Green Horizontal Connection Bar across all 9 columns */}
+      <div style={{ marginBottom: '12px' }}>
+        <div
+          style={{
+            height: '6px',
+            backgroundColor: '#005a2b',
+            borderRadius: '9999px',
+            width: '100%'
+          }}
+        />
       </div>
 
-      {/* 3. 9 COLUMNS HORIZONTAL MATRIX (CPA I-1 TO CPA I-9) */}
-      <div className="grid grid-cols-9 gap-3 items-start">
+      {/* 3. 9 COLUMNS HORIZONTAL MATRIX (CPA I-1 TO CPA I-9) - Exact replica of Print 01 */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(9, minmax(0, 1fr))',
+          gap: '10px',
+          alignItems: 'start'
+        }}
+      >
         {sortedCommands.map((command) => {
           const cmdUnits = units.filter((u) => u.grandCommandId === command.id);
 
           return (
-            <div key={command.id} className="flex flex-col items-center space-y-2">
+            <div
+              key={command.id}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+            >
               {/* Vertical connector line from green bar */}
-              <div className="w-0.5 h-3 bg-[#005a2b]"></div>
+              <div style={{ width: '2px', height: '12px', backgroundColor: '#005a2b' }} />
 
               {/* Official CPAI Emblem Box */}
-              <div className="w-16 h-16 bg-white border border-slate-300 rounded shadow-xs p-1 flex items-center justify-center">
+              <div
+                style={{
+                  width: '64px',
+                  height: '64px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '4px',
+                  padding: '4px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                }}
+              >
                 {command.emblemaUrl ? (
                   <img
                     src={command.emblemaUrl}
                     alt={`Emblema ${command.sigla}`}
-                    className="max-w-full max-h-full object-contain"
+                    style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                   />
                 ) : (
-                  <div className="text-[9px] font-bold text-slate-400 uppercase text-center">
+                  <div style={{ fontSize: '9px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase' }}>
                     Sem Emblema
                   </div>
                 )}
               </div>
 
               {/* Vertical connector line */}
-              <div className="w-0.5 h-2.5 bg-[#005a2b]"></div>
+              <div style={{ width: '2px', height: '10px', backgroundColor: '#005a2b' }} />
 
               {/* Grand Command Card (Nível 1) */}
-              <div className="w-full bg-white border-2 border-black rounded p-2 text-center shadow-xs">
-                <h3 className="font-black text-xs text-slate-900 uppercase">
+              <div
+                style={{
+                  width: '100%',
+                  backgroundColor: '#ffffff',
+                  border: '2px solid #000000',
+                  borderRadius: '4px',
+                  padding: '8px 4px',
+                  textAlign: 'center',
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <h3
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 900,
+                    color: '#000000',
+                    textTransform: 'uppercase',
+                    margin: 0
+                  }}
+                >
                   {command.sigla}
                 </h3>
-                <p className="font-extrabold text-[11px] text-slate-900 uppercase mt-0.5 leading-tight">
+                <p
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 900,
+                    color: '#005a2b',
+                    textTransform: 'uppercase',
+                    margin: '3px 0 0 0',
+                    lineHeight: 1.2
+                  }}
+                >
                   {command.comandante}
                 </p>
-                <p className="font-mono text-[10px] text-slate-700 mt-0.5 font-bold">
+                <p
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'monospace',
+                    fontWeight: 800,
+                    color: '#000000',
+                    margin: '3px 0 0 0'
+                  }}
+                >
                   {command.telefone}
                 </p>
               </div>
 
               {/* Vertical line leading to subordinate units */}
-              <div className="w-0.5 h-3 bg-[#005a2b]"></div>
+              <div style={{ width: '2px', height: '12px', backgroundColor: '#005a2b' }} />
 
               {/* Subordinate Units Stack in Exact Vertical Sequence */}
-              <div className="w-full flex flex-col space-y-2">
-                {cmdUnits.map((unit) => (
-                  <div
-                    key={unit.id}
-                    className={`w-full bg-white border-2 rounded p-2 text-center shadow-2xs ${
-                      unit.emRegulamentacao
-                        ? 'border-dashed border-slate-400 bg-slate-50'
-                        : 'border-black'
-                    }`}
-                  >
-                    <h4 className="font-black text-[11px] text-slate-950 uppercase leading-snug">
-                      {unit.identificacao}
-                    </h4>
-                    <p className="font-extrabold text-[10px] text-slate-800 uppercase leading-tight mt-0.5">
-                      {unit.municipio}
-                    </p>
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {cmdUnits.map((unit) => {
+                  const isDashed = Boolean(unit.emRegulamentacao);
 
-                    {!unit.emRegulamentacao ? (
-                      <>
-                        <p className="font-extrabold text-[10px] text-[#005a2b] uppercase leading-tight mt-0.5">
-                          {unit.comandante}
-                        </p>
-                        <p className="font-mono text-[10px] text-slate-700 font-semibold mt-0.5">
-                          {unit.telefone}
-                        </p>
-                      </>
-                    ) : (
-                      <p className="text-[9px] font-bold text-slate-500 uppercase mt-0.5">
-                        (EM REGULAMENTAÇÃO)
+                  return (
+                    <div
+                      key={unit.id}
+                      style={{
+                        width: '100%',
+                        backgroundColor: isDashed ? '#f8fafc' : '#ffffff',
+                        border: isDashed ? '2px dashed #94a3b8' : '2px solid #000000',
+                        borderRadius: '4px',
+                        padding: '8px 4px',
+                        textAlign: 'center',
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <h4
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 900,
+                          color: '#000000',
+                          textTransform: 'uppercase',
+                          margin: 0,
+                          lineHeight: 1.2
+                        }}
+                      >
+                        {unit.identificacao}
+                      </h4>
+                      <p
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: 900,
+                          color: '#000000',
+                          textTransform: 'uppercase',
+                          margin: '2px 0 0 0',
+                          lineHeight: 1.2
+                        }}
+                      >
+                        {unit.municipio}
                       </p>
-                    )}
-                  </div>
-                ))}
+
+                      {!isDashed ? (
+                        <>
+                          <p
+                            style={{
+                              fontSize: '10px',
+                              fontWeight: 900,
+                              color: '#005a2b',
+                              textTransform: 'uppercase',
+                              margin: '3px 0 0 0',
+                              lineHeight: 1.2
+                            }}
+                          >
+                            {unit.comandante}
+                          </p>
+                          <p
+                            style={{
+                              fontSize: '10px',
+                              fontFamily: 'monospace',
+                              fontWeight: 800,
+                              color: '#000000',
+                              margin: '3px 0 0 0'
+                            }}
+                          >
+                            {unit.telefone}
+                          </p>
+                        </>
+                      ) : (
+                        <p
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: 800,
+                            color: '#64748b',
+                            textTransform: 'uppercase',
+                            margin: '3px 0 0 0'
+                          }}
+                        >
+                          EM REGULAMENTAÇÃO
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
-              {/* Column 1 Special Box: CPE & 2º BPTUR Barreirinhas */}
+              {/* Column 1 Special Box: CPE & 2º BPTUR Barreirinhas (Exact replica of Print 01) */}
               {command.sigla === 'CPA I-1' && (
-                <div className="w-full flex flex-col items-center mt-3 pt-2 border-t-2 border-[#005a2b] space-y-2">
-                  <div className="w-full bg-slate-100 border-2 border-black rounded p-1.5 text-center shadow-xs">
-                    <span className="font-black text-xs text-slate-900 tracking-wider">CPE</span>
+                <div
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    marginTop: '10px',
+                    paddingTop: '8px',
+                    borderTop: '2px solid #005a2b',
+                    gap: '6px'
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#f1f5f9',
+                      border: '2px solid #000000',
+                      borderRadius: '4px',
+                      padding: '4px',
+                      textAlign: 'center',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <span style={{ fontWeight: 900, fontSize: '11px', color: '#000000', letterSpacing: '0.04em' }}>
+                      CPE
+                    </span>
                   </div>
 
-                  <div className="w-full bg-white border-2 border-black rounded p-1 text-center shadow-xs">
-                    <span className="font-extrabold text-[10px] text-slate-900">
+                  <div
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      borderRadius: '4px',
+                      padding: '4px',
+                      textAlign: 'center',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <span style={{ fontWeight: 900, fontSize: '10px', color: '#000000' }}>
                       {initialCpeSpecialUnit.unidade}
                     </span>
                   </div>
 
-                  <div className="w-full bg-white border-2 border-black rounded p-2 text-left shadow-xs">
-                    <div className="text-[9px] font-bold text-slate-800 space-y-0.5 leading-tight">
+                  <div
+                    style={{
+                      width: '100%',
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      borderRadius: '4px',
+                      padding: '6px 4px',
+                      textAlign: 'left',
+                      boxSizing: 'border-box'
+                    }}
+                  >
+                    <div style={{ fontSize: '9px', fontWeight: 800, color: '#0f172a', lineHeight: 1.3 }}>
                       {initialCpeSpecialUnit.municipios.map((m, idx) => (
                         <div key={idx}>{m}</div>
                       ))}
@@ -176,43 +428,81 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
       </div>
 
       {/* 4. Bottom Section: Tagline, Table of Commanders & Automatic Date */}
-      <div className="mt-8 pt-4 border-t-2 border-[#005a2b] flex items-end justify-between gap-6">
-        <div className="text-xs text-slate-500 font-medium max-w-md">
-          <p className="font-bold text-slate-700">POLÍCIA MILITAR DO MARANHÃO (PMMA)</p>
-          <p>Comando do Policiamento do Interior (CPI) • Organograma Institucional 2026</p>
-          <p className="text-[10px] text-slate-400 mt-1">
+      <div
+        style={{
+          marginTop: '28px',
+          paddingTop: '16px',
+          borderTop: '2px solid #005a2b',
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: '24px'
+        }}
+      >
+        <div style={{ fontSize: '11px', color: '#475569', fontWeight: 500, maxWidth: '420px' }}>
+          <p style={{ fontWeight: 800, color: '#0f172a', margin: 0 }}>POLÍCIA MILITAR DO MARANHÃO (PMMA)</p>
+          <p style={{ margin: '2px 0 0 0' }}>Comando do Policiamento do Interior (CPI) • Organograma Institucional 2026</p>
+          <p style={{ fontSize: '10px', color: '#94a3b8', margin: '4px 0 0 0' }}>
             Quartel do Comando Geral • Av. Jerônimo de Albuquerque, Calhau, São Luís - MA
           </p>
         </div>
 
         {/* CMT's DE ÁREA DO INTERIOR TABLE + DATE */}
-        <div className="flex flex-col items-end space-y-3">
-          <div className="border-2 border-black rounded overflow-hidden shadow-xs bg-white">
-            <div className="bg-[#005a2b] text-white text-center font-black text-xs py-1 px-3 uppercase tracking-wide border-b border-black">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+          <div
+            style={{
+              border: '2px solid #000000',
+              borderRadius: '4px',
+              overflow: 'hidden',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: '#005a2b',
+                color: '#ffffff',
+                textAlign: 'center',
+                fontWeight: 900,
+                fontSize: '11px',
+                padding: '4px 10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                borderBottom: '1px solid #000000'
+              }}
+            >
               CMT's DE ÁREA DO INTERIOR
             </div>
-            <table className="text-[10px] text-left">
-              <thead className="bg-slate-100 border-b border-slate-300 font-bold text-slate-800">
-                <tr>
-                  <th className="py-1 px-3 border-r border-slate-200">CPAI</th>
-                  <th className="py-1 px-3 border-r border-slate-200">POSTO/NOME</th>
-                  <th className="py-1 px-3 border-r border-slate-200">CONTATO</th>
-                  <th className="py-1 px-3">E-MAIL</th>
+            <table style={{ fontSize: '10px', textAlign: 'left', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f1f5f9', borderBottom: '1px solid #cbd5e1', fontWeight: 800, color: '#0f172a' }}>
+                  <th style={{ padding: '4px 8px', borderRight: '1px solid #e2e8f0' }}>CPAI</th>
+                  <th style={{ padding: '4px 8px', borderRight: '1px solid #e2e8f0' }}>POSTO/NOME</th>
+                  <th style={{ padding: '4px 8px', borderRight: '1px solid #e2e8f0' }}>CONTATO</th>
+                  <th style={{ padding: '4px 8px' }}>E-MAIL</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 font-medium">
-                {sortedCommands.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50">
-                    <td className="py-0.5 px-3 font-bold border-r border-slate-200 text-slate-900">
+              <tbody>
+                {sortedCommands.map((c, i) => (
+                  <tr
+                    key={c.id}
+                    style={{
+                      backgroundColor: i % 2 === 1 ? '#f8fafc' : '#ffffff',
+                      borderBottom: i < sortedCommands.length - 1 ? '1px solid #f1f5f9' : 'none'
+                    }}
+                  >
+                    <td style={{ padding: '3px 8px', fontWeight: 900, borderRight: '1px solid #e2e8f0', color: '#0f172a' }}>
                       {c.sigla}
                     </td>
-                    <td className="py-0.5 px-3 font-bold border-r border-slate-200 text-slate-900">
+                    <td style={{ padding: '3px 8px', fontWeight: 900, borderRight: '1px solid #e2e8f0', color: '#005a2b' }}>
                       {c.comandante}
                     </td>
-                    <td className="py-0.5 px-3 font-mono border-r border-slate-200 text-slate-800">
+                    <td style={{ padding: '3px 8px', fontFamily: 'monospace', fontWeight: 800, borderRight: '1px solid #e2e8f0', color: '#0f172a' }}>
                       {c.telefone}
                     </td>
-                    <td className="py-0.5 px-3 text-slate-600 font-mono text-[9px]">{c.email}</td>
+                    <td style={{ padding: '3px 8px', color: '#475569', fontFamily: 'monospace', fontSize: '9px' }}>
+                      {c.email}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -220,11 +510,32 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
           </div>
 
           {/* ÚLTIMA MODIFICAÇÃO (Dado automático) */}
-          <div className="border-2 border-black bg-white rounded p-1.5 text-center shadow-xs min-w-[220px]">
-            <p className="text-[9px] font-bold uppercase text-slate-600">
+          <div
+            style={{
+              border: '2px solid #000000',
+              backgroundColor: '#ffffff',
+              borderRadius: '4px',
+              padding: '4px 8px',
+              textAlign: 'center',
+              minWidth: '220px',
+              boxSizing: 'border-box'
+            }}
+          >
+            <p style={{ fontSize: '9px', fontWeight: 800, textTransform: 'uppercase', color: '#475569', margin: 0 }}>
               ÚLTIMA MODIFICAÇÃO (Dado automático)
             </p>
-            <div className="bg-slate-900 text-white font-mono font-black text-xs py-0.5 px-2 rounded mt-0.5">
+            <div
+              style={{
+                backgroundColor: '#0f172a',
+                color: '#ffffff',
+                fontFamily: 'monospace',
+                fontWeight: 900,
+                fontSize: '11px',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                marginTop: '3px'
+              }}
+            >
               {topCommand.dataAtualizacao || '11/11/2026'}
             </div>
           </div>

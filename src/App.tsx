@@ -62,7 +62,7 @@ export default function App() {
 
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState<boolean>(false);
   const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
-  const [exportModalFormat, setExportModalFormat] = useState<'all' | 'pdf' | 'png'>('all');
+  const [exportModalFormat, setExportModalFormat] = useState<'all' | 'pdf' | 'png' | 'formato1' | 'formato2' | 'formato3'>('formato1');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
@@ -268,7 +268,7 @@ export default function App() {
     }
   };
 
-  const handleOpenExportModal = (format: 'all' | 'pdf' | 'png' = 'all') => {
+  const handleOpenExportModal = (format: 'all' | 'pdf' | 'png' | 'formato1' | 'formato2' | 'formato3' = 'formato1') => {
     setExportModalFormat(format);
     setIsExportModalOpen(true);
   };
@@ -645,18 +645,18 @@ export default function App() {
         onSetRole={setRole}
       />
 
-      {/* Offscreen High-Resolution Render Sheet for Pristine PDF/PNG Capture of the Attached Model */}
+      {/* Offscreen High-Resolution Render Sheet for Pristine PDF/PNG Capture of FORMATO I */}
       <div 
+        id="export-sheet-wrapper"
         style={{ 
-          position: 'absolute', 
+          position: 'fixed', 
           top: 0, 
           left: 0, 
-          width: 0, 
-          height: 0, 
-          overflow: 'hidden', 
+          width: '1580px', 
+          zIndex: -99999,
           pointerEvents: 'none',
           opacity: 0,
-          zIndex: -9999
+          display: 'none'
         }} 
         aria-hidden="true"
       >

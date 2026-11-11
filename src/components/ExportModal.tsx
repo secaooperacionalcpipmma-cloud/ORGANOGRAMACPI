@@ -13,7 +13,7 @@ import {
   FileText,
   Shield,
   Loader2,
-  Eye
+  Check
 } from 'lucide-react';
 import {
   exportVisualOrganogramPdf,
@@ -24,20 +24,29 @@ import {
   printOrganogram
 } from '../utils/exportUtils';
 
+export type ExportFormatTab = 'formato1' | 'formato2' | 'formato3';
+
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   database: OrganogramDatabase;
-  initialFormat?: 'all' | 'pdf' | 'png';
+  initialFormat?: 'all' | 'pdf' | 'png' | 'formato1' | 'formato2' | 'formato3';
 }
 
 export const ExportModal: React.FC<ExportModalProps> = ({
   isOpen,
   onClose,
   database,
-  initialFormat = 'all'
+  initialFormat = 'formato1'
 }) => {
-  const [formatFilter, setFormatFilter] = useState<'all' | 'pdf' | 'png'>(initialFormat);
+  // Resolve initial tab: 'pdf' -> 'formato1', 'png' -> 'formato3', etc.
+  const resolveInitialTab = (f: string): ExportFormatTab => {
+    if (f === 'formato2') return 'formato2';
+    if (f === 'formato3' || f === 'png') return 'formato3';
+    return 'formato1';
+  };
+
+  const [activeTab, setActiveTab] = useState<ExportFormatTab>(resolveInitialTab(initialFormat));
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -45,70 +54,78 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   const showSuccess = (msg: string) => {
     setSuccessMessage(msg);
-    setTimeout(() => setSuccessMessage(null), 4000);
+    setTimeout(() => setSuccessMessage(null), 4500);
   };
 
-  // Action handlers
-  const handleDownloadVisualPdf = async () => {
-    setLoadingAction('visual-pdf');
+  // =========================================================================
+  // ACTION HANDLERS
+  // =========================================================================
+
+  // FORMATO I: Organograma Gráfico Oficial 2026 (PDF dinâmico do sistema - Print 01)
+  const handleDownloadFormato1Pdf = async () => {
+    setLoadingAction('formato1-pdf');
     try {
       await exportVisualOrganogramPdf(
         'official-pdf-model-sheet',
-        `ORGANOGRAMA_CPI_2026_MODELO_OFICIAL_${Date.now()}.pdf`
+        `ORGANOGRAMA_CPI_2026_FORMATO_I_${Date.now()}.pdf`
       );
-      showSuccess('PDF do Modelo Oficial (Prancha 9 Colunas) gerado com sucesso!');
+      showSuccess('PDF do FORMATO I (Organograma Gráfico Oficial) gerado com sucesso com os dados do sistema!');
     } catch (err: any) {
-      alert(`Erro ao gerar PDF do modelo oficial: ${err.message}`);
+      alert(`Erro ao gerar PDF do FORMATO I: ${err.message}`);
     } finally {
       setLoadingAction(null);
     }
   };
 
-  const handleDownloadVisualPng = async () => {
-    setLoadingAction('visual-png');
+  // FORMATO I em Imagem (PNG)
+  const handleDownloadFormato1Png = async () => {
+    setLoadingAction('formato1-png');
     try {
       await exportVisualOrganogramPng(
         'official-pdf-model-sheet',
-        `ORGANOGRAMA_CPI_2026_MODELO_OFICIAL_${Date.now()}.png`
+        `ORGANOGRAMA_CPI_2026_FORMATO_I_${Date.now()}.png`
       );
-      showSuccess('Imagem PNG do Modelo Oficial exportada em alta resolução!');
+      showSuccess('Imagem PNG do FORMATO I (Organograma Gráfico) exportada em alta resolução!');
     } catch (err: any) {
-      alert(`Erro ao gerar imagem PNG do modelo oficial: ${err.message}`);
+      alert(`Erro ao gerar imagem do FORMATO I: ${err.message}`);
     } finally {
       setLoadingAction(null);
     }
   };
 
-  const handleDownloadCadastralPdf = () => {
-    setLoadingAction('cadastral-pdf');
+  // FORMATO II: Relatório Cadastral e Estatístico (PDF - Print 02)
+  const handleDownloadFormato2Pdf = () => {
+    setLoadingAction('formato2-pdf');
     try {
       exportCadastralReportPdf(
         database,
-        `RELATORIO_CADASTRAL_CPI_PMMA_2026_${Date.now()}.pdf`
+        `RELATORIO_CADASTRAL_CPI_PMMA_FORMATO_II_${Date.now()}.pdf`
       );
-      showSuccess('PDF do Relatório Cadastral gerado com sucesso!');
+      showSuccess('PDF do FORMATO II (Relatório Estatístico e Cadastral) gerado com sucesso!');
     } catch (err: any) {
-      alert(`Erro ao gerar relatório cadastral: ${err.message}`);
+      alert(`Erro ao gerar PDF do FORMATO II: ${err.message}`);
     } finally {
       setLoadingAction(null);
     }
   };
 
-  const handleDownloadCadastralPng = async () => {
-    setLoadingAction('cadastral-png');
+  // FORMATO II em Imagem (PNG)
+  const handleDownloadFormato2Png = async () => {
+    setLoadingAction('formato2-png');
     try {
       await exportCadastralReportPng(
         'report-printable-area',
-        `RELATORIO_CADASTRAL_CPI_PMMA_2026_${Date.now()}.png`
+        `RELATORIO_CADASTRAL_CPI_PMMA_FORMATO_II_${Date.now()}.png`
       );
-      showSuccess('Imagem PNG do Relatório Cadastral exportada!');
+      showSuccess('Imagem PNG do FORMATO II (Relatório Cadastral) exportada com sucesso!');
     } catch (err: any) {
-      alert(`Erro ao gerar imagem do relatório cadastral: ${err.message}`);
+      alert(`Erro ao gerar imagem do FORMATO II: ${err.message}`);
     } finally {
       setLoadingAction(null);
     }
   };
 
+  // Download do arquivo PDF original anexo
   const handleDownloadOriginalPdf = () => {
     const link = document.createElement('a');
     link.href = OFFICIAL_ORIGINAL_PDF_URL;
@@ -131,10 +148,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             </div>
             <div>
               <h3 className="font-black text-base sm:text-lg tracking-wide uppercase">
-                EXPORTAR ORGANOGRAMA INSTITUCIONAL 2026
+                CENTRAL DE EXPORTAÇÃO OFICIAL – CPI 2026
               </h3>
               <p className="text-xs text-emerald-100 font-medium">
-                Escolha a versão desejada: Modelo Gráfico Oficial (PDF Anexo) ou Relatório Cadastral Operacional.
+                Selecione o formato desejado: FORMATO I (Organograma Gráfico), FORMATO II (Relatório Cadastral) ou FORMATO III (Imagens PNG).
               </p>
             </div>
           </div>
@@ -149,38 +166,44 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         </div>
 
         {/* Format Selector Tabs: FORMATO I, FORMATO II, FORMATO III */}
-        <div className="bg-slate-100 px-3 sm:px-4 py-2 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center space-x-1 bg-white p-1 rounded-md border border-slate-300 text-xs font-bold w-full sm:w-auto">
+        <div className="bg-slate-100 px-3 sm:px-4 py-2.5 border-b border-slate-300 flex flex-wrap items-center justify-between gap-2">
+          <div className="grid grid-cols-3 sm:flex sm:items-center space-x-0 sm:space-x-1.5 bg-white p-1 rounded-lg border border-slate-300 text-xs font-black w-full sm:w-auto gap-1 sm:gap-0">
+            {/* TAB 1: FORMATO I */}
             <button
-              onClick={() => setFormatFilter('all')}
-              title="FORMATO I: Exibir todos os formatos (PDF e Imagem PNG)"
-              className={`flex-1 sm:flex-initial px-3 py-1.5 sm:py-1 rounded text-center transition-colors ${
-                formatFilter === 'all'
-                  ? 'bg-[#005a2b] text-white shadow-xs font-black'
-                  : 'text-slate-700 hover:text-slate-900'
+              onClick={() => setActiveTab('formato1')}
+              title="FORMATO I: Organograma Gráfico Oficial (Print 01)"
+              className={`px-3 py-1.5 rounded-md flex items-center justify-center space-x-1.5 transition-colors ${
+                activeTab === 'formato1'
+                  ? 'bg-[#005a2b] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
+              <Layers className="w-3.5 h-3.5 flex-shrink-0" />
               <span>FORMATO I</span>
             </button>
+
+            {/* TAB 2: FORMATO II */}
             <button
-              onClick={() => setFormatFilter('pdf')}
-              title="FORMATO II: Filtrar opções apenas em PDF"
-              className={`flex-1 sm:flex-initial px-3 py-1.5 sm:py-1 rounded flex items-center justify-center space-x-1 transition-colors ${
-                formatFilter === 'pdf'
-                  ? 'bg-rose-700 text-white shadow-xs font-black'
-                  : 'text-slate-700 hover:text-slate-900'
+              onClick={() => setActiveTab('formato2')}
+              title="FORMATO II: Relatório Estatístico e Cadastral (Print 02)"
+              className={`px-3 py-1.5 rounded-md flex items-center justify-center space-x-1.5 transition-colors ${
+                activeTab === 'formato2'
+                  ? 'bg-[#005a2b] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              <FileDown className="w-3.5 h-3.5 flex-shrink-0" />
+              <FileText className="w-3.5 h-3.5 flex-shrink-0" />
               <span>FORMATO II</span>
             </button>
+
+            {/* TAB 3: FORMATO III */}
             <button
-              onClick={() => setFormatFilter('png')}
-              title="FORMATO III: Filtrar opções apenas em Imagem PNG"
-              className={`flex-1 sm:flex-initial px-3 py-1.5 sm:py-1 rounded flex items-center justify-center space-x-1 transition-colors ${
-                formatFilter === 'png'
-                  ? 'bg-blue-700 text-white shadow-xs font-black'
-                  : 'text-slate-700 hover:text-slate-900'
+              onClick={() => setActiveTab('formato3')}
+              title="FORMATO III: Baixar tanto o Formato I quanto o II em formato de Imagem PNG"
+              className={`px-3 py-1.5 rounded-md flex items-center justify-center space-x-1.5 transition-colors ${
+                activeTab === 'formato3'
+                  ? 'bg-[#005a2b] text-white shadow-xs'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <ImageIcon className="w-3.5 h-3.5 flex-shrink-0" />
@@ -193,215 +216,294 @@ export const ExportModal: React.FC<ExportModalProps> = ({
               onClose();
               printOrganogram();
             }}
-            className="flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-[#005a2b] px-3 py-1 bg-white rounded border border-slate-300 shadow-2xs"
+            className="hidden sm:flex items-center space-x-1.5 text-xs font-bold text-slate-700 hover:text-[#005a2b] px-3 py-1.5 bg-white rounded border border-slate-300 shadow-2xs"
           >
             <Printer className="w-3.5 h-3.5 text-slate-600" />
-            <span>Imprimir Direto na Impressora</span>
+            <span>Imprimir</span>
           </button>
         </div>
 
         {/* Success Alert Banner */}
         {successMessage && (
-          <div className="bg-emerald-50 border-b border-emerald-300 px-4 py-2 flex items-center space-x-2 text-xs font-bold text-emerald-800 animate-in fade-in">
+          <div className="bg-emerald-50 border-b border-emerald-300 px-4 py-2.5 flex items-center space-x-2 text-xs font-bold text-emerald-800 animate-in fade-in">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
 
-        {/* Modal Body: Comparison of Both Versions */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* ========================================================= */}
-            {/* VERSÃO 1: MODELO GRÁFICO OFICIAL (IDÊNTICO AO PDF ANEXO) */}
-            {/* ========================================================= */}
-            <div className="border-2 border-[#005a2b] bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-[#005a2b] text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-wider flex items-center space-x-1">
-                <Sparkles className="w-3 h-3 text-amber-300" />
-                <span>Modelo Anexo (2026)</span>
-              </div>
-
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="p-2 bg-emerald-100 text-[#005a2b] rounded-lg border border-emerald-300">
-                    <Layers className="w-5 h-5 text-[#005a2b]" />
+        {/* Modal Body */}
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 flex-1">
+          {/* ================================================================= */}
+          {/* ABA 1: FORMATO I - ORGANOGRAMA GRÁFICO OFICIAL (PRINT 01)         */}
+          {/* ================================================================= */}
+          {activeTab === 'formato1' && (
+            <div className="border-2 border-[#005a2b] bg-white rounded-xl p-5 shadow-sm space-y-4 animate-in fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-2">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 bg-emerald-100 text-[#005a2b] rounded-lg border border-emerald-300 flex-shrink-0">
+                    <Layers className="w-6 h-6 text-[#005a2b]" />
                   </div>
                   <div>
-                    <h4 className="font-black text-sm sm:text-base text-slate-900 uppercase">
-                      1. Modelo Gráfico Oficial
-                    </h4>
-                    <span className="text-[11px] font-bold text-[#005a2b]">
-                      Prancha Visual Completa em 9 Colunas
-                    </span>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="font-black text-base sm:text-lg text-slate-900 uppercase">
+                        FORMATO I – Organograma Gráfico Oficial 2026 (PDF)
+                      </h4>
+                      <span className="bg-emerald-100 text-[#005a2b] text-[10px] font-black px-2 py-0.5 rounded border border-emerald-300 uppercase">
+                        Print 01
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-[#005a2b]">
+                      Prancha Visual Panorâmica em 9 Colunas Gerada a partir dos Dados do Sistema
+                    </p>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                  Visual idêntico ao modelo oficial em PDF: prancha panorâmica com os 9 Grandes Comandos
-                  (CPA I-1 ao CPA I-9), todos os emblemas institucionais coloridos, linhas conectoras verdes,
-                  bloco CPE de Barreirinhas, quadro resumo dos Comandantes de Área e data automática.
-                </p>
-
-                {/* Visual Feature Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4 text-[10px] font-bold">
-                  <span className="bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded">
-                    9 Colunas Oficiais
-                  </span>
-                  <span className="bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded">
-                    Emblemas CPAI 1 a 9
-                  </span>
-                  <span className="bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded">
-                    Quadro CMT's de Área
-                  </span>
-                  <span className="bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded">
-                    Estrutura CPE
-                  </span>
+                <div className="text-[11px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
+                  Atualização: {database.topCommand.dataAtualizacao || '11/11/2026'}
                 </div>
               </div>
 
-              {/* Action Buttons for Version 1 */}
-              <div className="pt-4 border-t border-slate-200 space-y-2">
-                {(formatFilter === 'all' || formatFilter === 'pdf') && (
-                  <button
-                    onClick={handleDownloadVisualPdf}
-                    disabled={loadingAction !== null}
-                    className="w-full py-2.5 px-4 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-bold text-xs flex items-center justify-center space-x-2 shadow-xs transition-colors disabled:opacity-50"
-                  >
-                    {loadingAction === 'visual-pdf' ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Gerando PDF da Prancha Oficial...</span>
-                      </>
-                    ) : (
-                      <>
-                        <FileDown className="w-4 h-4" />
-                        <span>Baixar em PDF (Prancha Oficial)</span>
-                      </>
-                    )}
-                  </button>
-                )}
+              {/* Description & Requirements Box */}
+              <div className="bg-emerald-50/70 border border-emerald-300 rounded-lg p-3.5 text-xs text-slate-800 space-y-2">
+                <p className="font-medium leading-relaxed">
+                  Gera o documento <strong>PDF oficial</strong> idêntico ao modelo visual apresentado no computador (<strong>Print 01</strong>), extraindo e compilando em tempo real todos os dados cadastrados no sistema:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-bold text-[11px]">
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-[#005a2b] flex-shrink-0" />
+                    <span>9 Grandes Comandos (CPA I-1 ao CPA I-9)</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-[#005a2b] flex-shrink-0" />
+                    <span>Emblemas oficiais coloridos no topo</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-[#005a2b] flex-shrink-0" />
+                    <span>Unidades subordinadas, municípios e comandantes</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-[#005a2b] flex-shrink-0" />
+                    <span>Bloco CPE de Barreirinhas & Quadro CMT's de Área</span>
+                  </div>
+                </div>
+              </div>
 
-                {(formatFilter === 'all' || formatFilter === 'png') && (
-                  <button
-                    onClick={handleDownloadVisualPng}
-                    disabled={loadingAction !== null}
-                    className="w-full py-2.5 px-4 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-bold text-xs flex items-center justify-center space-x-2 shadow-xs transition-colors disabled:opacity-50"
-                  >
-                    {loadingAction === 'visual-png' ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Gerando Imagem PNG...</span>
-                      </>
-                    ) : (
-                      <>
-                        <ImageIcon className="w-4 h-4" />
-                        <span>Baixar em Imagem (PNG Alta Resolução)</span>
-                      </>
-                    )}
-                  </button>
-                )}
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                <button
+                  onClick={handleDownloadFormato1Pdf}
+                  disabled={loadingAction !== null}
+                  className="w-full sm:flex-1 py-3 px-5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-black text-sm flex items-center justify-center space-x-2 shadow-sm transition-all disabled:opacity-50"
+                >
+                  {loadingAction === 'formato1-pdf' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Gerando PDF do FORMATO I a partir dos dados do sistema...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileDown className="w-4 h-4" />
+                      <span>Baixar FORMATO I em PDF (Prancha 9 Colunas)</span>
+                    </>
+                  )}
+                </button>
 
-                {/* Direct download of original PDF file */}
                 <button
                   onClick={handleDownloadOriginalPdf}
-                  className="w-full py-2 px-3 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-lg font-bold text-[11px] flex items-center justify-center space-x-1.5 transition-colors"
-                  title="Baixar cópia idêntica do arquivo original em PDF enviado"
+                  className="w-full sm:w-auto py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-lg font-bold text-xs flex items-center justify-center space-x-1.5 transition-colors"
+                  title="Baixar arquivo PDF original anexo"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
                   <span>Baixar Arquivo PDF Original Anexo (.pdf)</span>
                 </button>
               </div>
             </div>
+          )}
 
-            {/* ========================================================= */}
-            {/* VERSÃO 2: RELATÓRIO CADASTRAL (VERSÃO EXISTENTE NO SISTEMA) */}
-            {/* ========================================================= */}
-            <div className="border-2 border-black bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-slate-800 text-white text-[10px] font-black px-3 py-1 rounded-bl-lg uppercase tracking-wider">
-                Versão Cadastral
+          {/* ================================================================= */}
+          {/* ABA 2: FORMATO II - RELATÓRIO CADASTRAL E ESTATÍSTICO (PRINT 02)  */}
+          {/* ================================================================= */}
+          {activeTab === 'formato2' && (
+            <div className="border-2 border-black bg-white rounded-xl p-5 shadow-sm space-y-4 animate-in fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 gap-2">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 bg-slate-100 text-slate-800 rounded-lg border border-slate-300 flex-shrink-0">
+                    <FileText className="w-6 h-6 text-slate-800" />
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="font-black text-base sm:text-lg text-slate-900 uppercase">
+                        FORMATO II – Relatório Estatístico e Cadastral Oficial (PDF)
+                      </h4>
+                      <span className="bg-slate-200 text-slate-800 text-[10px] font-black px-2 py-0.5 rounded border border-slate-300 uppercase">
+                        Print 02
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-slate-600">
+                      Documento Executivo Tabular por Grande Comando (Conforme Print 02)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="text-[11px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
+                  {database.units.length} Unidades Cadastradas
+                </div>
               </div>
 
-              <div>
-                <div className="flex items-center space-x-2 mb-2">
-                  <div className="p-2 bg-slate-100 text-slate-700 rounded-lg border border-slate-300">
-                    <FileText className="w-5 h-5 text-slate-700" />
+              {/* Description Box */}
+              <div className="bg-slate-50 border border-slate-300 rounded-lg p-3.5 text-xs text-slate-800 space-y-2">
+                <p className="font-medium leading-relaxed">
+                  Gera o documento <strong>PDF executivo multipágina</strong> organizado em tabelas detalhadas conforme o modelo apresentado no <strong>Print 02</strong>:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 font-bold text-[11px]">
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-slate-900 flex-shrink-0" />
+                    <span>Tabelas individuais por Grande Comando (CPAI-1 a 9)</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-slate-900 flex-shrink-0" />
+                    <span>Colunas: Unidade, Tipo, Município Sede, Comandante, Telefone, E-mail</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-slate-900 flex-shrink-0" />
+                    <span>Diagramação executiva oficial da Polícia Militar do Maranhão</span>
+                  </div>
+                  <div className="flex items-center space-x-1.5 text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-slate-900 flex-shrink-0" />
+                    <span>Formato A4 Paisagem pronto para impressão e despachos</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <div className="pt-2">
+                <button
+                  onClick={handleDownloadFormato2Pdf}
+                  disabled={loadingAction !== null}
+                  className="w-full py-3 px-5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-black text-sm flex items-center justify-center space-x-2 shadow-sm transition-all disabled:opacity-50"
+                >
+                  {loadingAction === 'formato2-pdf' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Gerando PDF do Relatório Cadastral...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileDown className="w-4 h-4" />
+                      <span>Baixar FORMATO II em PDF (Relatório Cadastral)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ================================================================= */}
+          {/* ABA 3: FORMATO III - BAIXAR FORMATO I E II EM IMAGEM (PNG)       */}
+          {/* ================================================================= */}
+          {activeTab === 'formato3' && (
+            <div className="space-y-4 animate-in fade-in">
+              <div className="bg-blue-50 border-2 border-blue-400 rounded-xl p-4">
+                <div className="flex items-center space-x-2.5">
+                  <div className="p-2 bg-blue-600 text-white rounded-lg">
+                    <ImageIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="font-black text-sm sm:text-base text-slate-900 uppercase">
-                      2. Relatório Operacional
+                      FORMATO III – Exportação em Formato de Imagem de Alta Resolução (PNG)
                     </h4>
-                    <span className="text-[11px] font-bold text-slate-600">
-                      Versão Cadastral Tabular Multipágina
-                    </span>
+                    <p className="text-xs text-blue-900 font-medium">
+                      Baixe tanto o <strong>FORMATO I</strong> quanto o <strong>FORMATO II</strong> em formato de imagem (.png) de alta definição:
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Opção A: Formato I em Imagem */}
+                <div className="border-2 border-[#005a2b] bg-white rounded-xl p-4 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
+                  <div>
+                    <div className="flex items-center justify-between pb-2 border-b border-emerald-200">
+                      <div className="flex items-center space-x-2">
+                        <Layers className="w-4 h-4 text-[#005a2b]" />
+                        <h5 className="font-black text-xs sm:text-sm text-slate-900 uppercase">
+                          FORMATO I em Imagem
+                        </h5>
+                      </div>
+                      <span className="bg-emerald-100 text-[#005a2b] text-[9px] font-black px-2 py-0.5 rounded uppercase">
+                        Print 01
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                      Imagem em altíssima resolução da prancha visual do Organograma Institucional 2026 em 9 colunas completas, com emblemas e conexões.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100">
+                    <button
+                      onClick={handleDownloadFormato1Png}
+                      disabled={loadingAction !== null}
+                      className="w-full py-2.5 px-4 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-black text-xs flex items-center justify-center space-x-2 shadow-xs transition-colors disabled:opacity-50"
+                    >
+                      {loadingAction === 'formato1-png' ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Gerando Imagem do FORMATO I...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="w-3.5 h-3.5" />
+                          <span>Baixar FORMATO I em Imagem (PNG)</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                  Relatório administrativo multipágina ideal para despachos, arquivo e controle operacional.
-                  Contém relação cadastral detalhada com todas as unidades (BPMs e CIPMs), cidades sede,
-                  jurisdições municipais, postos, telefones e e-mails de cada comando.
-                </p>
+                {/* Opção B: Formato II em Imagem */}
+                <div className="border-2 border-black bg-white rounded-xl p-4 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow">
+                  <div>
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="w-4 h-4 text-slate-800" />
+                        <h5 className="font-black text-xs sm:text-sm text-slate-900 uppercase">
+                          FORMATO II em Imagem
+                        </h5>
+                      </div>
+                      <span className="bg-slate-200 text-slate-800 text-[9px] font-black px-2 py-0.5 rounded uppercase">
+                        Print 02
+                      </span>
+                    </div>
 
-                {/* Feature Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4 text-[10px] font-bold">
-                  <span className="bg-slate-100 text-slate-800 border border-slate-300 px-2 py-0.5 rounded">
-                    Listagem Completa
-                  </span>
-                  <span className="bg-slate-100 text-slate-800 border border-slate-300 px-2 py-0.5 rounded">
-                    Tabelas por Comando
-                  </span>
-                  <span className="bg-slate-100 text-slate-800 border border-slate-300 px-2 py-0.5 rounded">
-                    E-mails e Contatos
-                  </span>
-                  <span className="bg-slate-100 text-slate-800 border border-slate-300 px-2 py-0.5 rounded">
-                    Paginação Oficial
-                  </span>
+                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                      Imagem do Relatório Cadastral e Estatístico com as tabelas completas de Grandes Comandos, Batalhões, Comandantes e Municípios.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-100">
+                    <button
+                      onClick={handleDownloadFormato2Png}
+                      disabled={loadingAction !== null}
+                      className="w-full py-2.5 px-4 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-black text-xs flex items-center justify-center space-x-2 shadow-xs transition-colors disabled:opacity-50"
+                    >
+                      {loadingAction === 'formato2-png' ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Gerando Imagem do FORMATO II...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="w-3.5 h-3.5" />
+                          <span>Baixar FORMATO II em Imagem (PNG)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              {/* Action Buttons for Version 2 */}
-              <div className="pt-4 border-t border-slate-200 space-y-2">
-                {(formatFilter === 'all' || formatFilter === 'pdf') && (
-                  <button
-                    onClick={handleDownloadCadastralPdf}
-                    disabled={loadingAction !== null}
-                    className="w-full py-2.5 px-4 bg-rose-700 hover:bg-rose-800 text-white rounded-lg font-bold text-xs flex items-center justify-center space-x-2 shadow-xs transition-colors disabled:opacity-50"
-                  >
-                    {loadingAction === 'cadastral-pdf' ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Gerando Relatório Cadastral...</span>
-                      </>
-                    ) : (
-                      <>
-                        <FileDown className="w-4 h-4" />
-                        <span>Baixar em PDF (Relatório Cadastral)</span>
-                      </>
-                    )}
-                  </button>
-                )}
-
-                {(formatFilter === 'all' || formatFilter === 'png') && (
-                  <button
-                    onClick={handleDownloadCadastralPng}
-                    disabled={loadingAction !== null}
-                    className="w-full py-2.5 px-4 bg-blue-700 hover:bg-blue-800 text-white rounded-lg font-bold text-xs flex items-center justify-center space-x-2 shadow-xs transition-colors disabled:opacity-50"
-                  >
-                    {loadingAction === 'cadastral-png' ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Gerando Imagem PNG...</span>
-                      </>
-                    ) : (
-                      <>
-                        <ImageIcon className="w-4 h-4" />
-                        <span>Baixar em Imagem (PNG)</span>
-                      </>
-                    )}
-                  </button>
-                )}
-              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Modal Footer */}

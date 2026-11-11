@@ -163,101 +163,122 @@ export async function safeHtml2Canvas(element: HTMLElement, options: any = {}): 
  * Exports the visual 9-columns organogram sheet as a high-definition landscape PDF
  * perfectly fitted onto a single landscape page (A3 landscape for maximum sharpness).
  */
+/**
+ * Exports the visual 9-columns organogram sheet (FORMATO I - Print 01) as a high-definition landscape PDF
+ * generated dynamically from current system database data.
+ */
 export async function exportVisualOrganogramPdf(
   elementId = 'official-pdf-model-sheet',
-  filename = 'ORGANOGRAMA_CPI_2026_MODELO_OFICIAL.pdf'
+  filename = 'ORGANOGRAMA_CPI_2026_FORMATO_I_OFICIAL.pdf'
 ): Promise<void> {
-  let element = document.getElementById(elementId);
-  if (!element) {
-    element = document.getElementById('organogram-canvas-container');
-  }
-  if (!element) {
-    throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
+  const wrapper = document.getElementById('export-sheet-wrapper');
+  if (wrapper) {
+    wrapper.style.display = 'block';
+    wrapper.style.opacity = '0.01';
   }
 
-  let canvas: HTMLCanvasElement;
   try {
-    canvas = await safeHtml2Canvas(element, {
-      scale: 2.2,
+    let element = document.getElementById(elementId);
+    if (!element) {
+      element = document.getElementById('organogram-canvas-container');
+    }
+    if (!element) {
+      throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
+    }
+
+    const scale = (typeof window !== 'undefined' && window.innerWidth < 768) ? 1.6 : 2.0;
+
+    const canvas = await safeHtml2Canvas(element, {
+      scale,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
       windowWidth: 1600,
     });
-  } catch (err: any) {
-    console.warn('safeHtml2Canvas encontrou aviso, acionando fallback de alta fidelidade:', err);
-    // Fallback: trigger direct download of the official high-res PDF file
-    const link = document.createElement('a');
-    link.href = OFFICIAL_ORIGINAL_PDF_URL;
-    link.download = filename;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    return;
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+    // A3 Landscape (420mm x 297mm) guarantees high legibility for 9 columns
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a3',
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+
+    // Compute dimensions preserving aspect ratio
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const margin = 8; // 8mm margins
+    const usableWidth = pdfWidth - margin * 2;
+    const usableHeight = pdfHeight - margin * 2;
+
+    const ratio = Math.min(usableWidth / imgWidth, usableHeight / imgHeight);
+    const finalWidth = imgWidth * ratio;
+    const finalHeight = imgHeight * ratio;
+    const posX = (pdfWidth - finalWidth) / 2;
+    const posY = (pdfHeight - finalHeight) / 2;
+
+    pdf.addImage(imgData, 'JPEG', posX, posY, finalWidth, finalHeight, undefined, 'FAST');
+    pdf.save(filename);
+  } finally {
+    if (wrapper) {
+      wrapper.style.display = 'none';
+      wrapper.style.opacity = '0';
+    }
   }
-
-  const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
-  // A3 Landscape (420mm x 297mm) guarantees high legibility for 9 columns
-  const pdf = new jsPDF({
-    orientation: 'landscape',
-    unit: 'mm',
-    format: 'a3',
-  });
-
-  const pdfWidth = pdf.internal.pageSize.getWidth();
-  const pdfHeight = pdf.internal.pageSize.getHeight();
-
-  // Compute dimensions preserving aspect ratio
-  const imgWidth = canvas.width;
-  const imgHeight = canvas.height;
-  const margin = 8; // 8mm margins
-  const usableWidth = pdfWidth - margin * 2;
-  const usableHeight = pdfHeight - margin * 2;
-
-  const ratio = Math.min(usableWidth / imgWidth, usableHeight / imgHeight);
-  const finalWidth = imgWidth * ratio;
-  const finalHeight = imgHeight * ratio;
-  const posX = (pdfWidth - finalWidth) / 2;
-  const posY = (pdfHeight - finalHeight) / 2;
-
-  pdf.addImage(imgData, 'JPEG', posX, posY, finalWidth, finalHeight, undefined, 'FAST');
-  pdf.save(filename);
 }
 
 /**
- * Exports the visual 9-columns organogram sheet as a high-resolution PNG image
+ * Exports the visual 9-columns organogram sheet (FORMATO I - Print 01) as a high-resolution PNG image
+ * generated dynamically from current system database data.
  */
 export async function exportVisualOrganogramPng(
   elementId = 'official-pdf-model-sheet',
-  filename = 'ORGANOGRAMA_CPI_2026_MODELO_OFICIAL.png'
+  filename = 'ORGANOGRAMA_CPI_2026_FORMATO_I_OFICIAL.png'
 ): Promise<void> {
-  let element = document.getElementById(elementId);
-  if (!element) {
-    element = document.getElementById('organogram-canvas-container');
-  }
-  if (!element) {
-    throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
+  const wrapper = document.getElementById('export-sheet-wrapper');
+  if (wrapper) {
+    wrapper.style.display = 'block';
+    wrapper.style.opacity = '0.01';
   }
 
-  const canvas = await safeHtml2Canvas(element, {
-    scale: 2.2, // 2.2x gives ultra-crisp ~3500px wide image
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-    windowWidth: 1600,
-  });
+  try {
+    let element = document.getElementById(elementId);
+    if (!element) {
+      element = document.getElementById('organogram-canvas-container');
+    }
+    if (!element) {
+      throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
+    }
 
-  const dataUrl = canvas.toDataURL('image/png');
-  const link = document.createElement('a');
-  link.href = dataUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    const scale = (typeof window !== 'undefined' && window.innerWidth < 768) ? 1.6 : 2.0;
+
+    const canvas = await safeHtml2Canvas(element, {
+      scale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      windowWidth: 1600,
+    });
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } finally {
+    if (wrapper) {
+      wrapper.style.display = 'none';
+      wrapper.style.opacity = '0';
+    }
+  }
 }
 
 // ============================================================================
