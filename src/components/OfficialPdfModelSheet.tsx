@@ -27,7 +27,7 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
     <div
       id={id}
       className={`bg-white text-slate-900 font-sans p-6 select-none ${className}`}
-      style={{ width: '1580px', minHeight: '1000px', margin: '0 auto' }}
+      style={{ width: '1580px', minHeight: '1000px', margin: '0 auto', backgroundColor: '#ffffff', color: '#0f172a' }}
     >
       {/* 1. Header with Title and Emblems on Left/Right corners identical to PDF */}
       <div className="flex items-center justify-between pb-3 border-b-2 border-[#005a2b] mb-3">

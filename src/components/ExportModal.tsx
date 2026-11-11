@@ -148,40 +148,43 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           </button>
         </div>
 
-        {/* Format Selector Pills */}
-        <div className="bg-slate-100 px-4 py-2 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center space-x-1 bg-white p-1 rounded-md border border-slate-300 text-xs font-bold">
+        {/* Format Selector Tabs: FORMATO I, FORMATO II, FORMATO III */}
+        <div className="bg-slate-100 px-3 sm:px-4 py-2 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center space-x-1 bg-white p-1 rounded-md border border-slate-300 text-xs font-bold w-full sm:w-auto">
             <button
               onClick={() => setFormatFilter('all')}
-              className={`px-3 py-1 rounded transition-colors ${
+              title="FORMATO I: Exibir todos os formatos (PDF e Imagem PNG)"
+              className={`flex-1 sm:flex-initial px-3 py-1.5 sm:py-1 rounded text-center transition-colors ${
                 formatFilter === 'all'
-                  ? 'bg-[#005a2b] text-white shadow-xs'
+                  ? 'bg-[#005a2b] text-white shadow-xs font-black'
                   : 'text-slate-700 hover:text-slate-900'
               }`}
             >
-              Todos os Formatos
+              <span>FORMATO I</span>
             </button>
             <button
               onClick={() => setFormatFilter('pdf')}
-              className={`px-3 py-1 rounded flex items-center space-x-1 transition-colors ${
+              title="FORMATO II: Filtrar opções apenas em PDF"
+              className={`flex-1 sm:flex-initial px-3 py-1.5 sm:py-1 rounded flex items-center justify-center space-x-1 transition-colors ${
                 formatFilter === 'pdf'
-                  ? 'bg-rose-700 text-white shadow-xs'
+                  ? 'bg-rose-700 text-white shadow-xs font-black'
                   : 'text-slate-700 hover:text-slate-900'
               }`}
             >
-              <FileDown className="w-3.5 h-3.5" />
-              <span>Apenas PDF</span>
+              <FileDown className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>FORMATO II</span>
             </button>
             <button
               onClick={() => setFormatFilter('png')}
-              className={`px-3 py-1 rounded flex items-center space-x-1 transition-colors ${
+              title="FORMATO III: Filtrar opções apenas em Imagem PNG"
+              className={`flex-1 sm:flex-initial px-3 py-1.5 sm:py-1 rounded flex items-center justify-center space-x-1 transition-colors ${
                 formatFilter === 'png'
-                  ? 'bg-blue-700 text-white shadow-xs'
+                  ? 'bg-blue-700 text-white shadow-xs font-black'
                   : 'text-slate-700 hover:text-slate-900'
               }`}
             >
-              <ImageIcon className="w-3.5 h-3.5" />
-              <span>Apenas Imagem (PNG)</span>
+              <ImageIcon className="w-3.5 h-3.5 flex-shrink-0" />
+              <span>FORMATO III</span>
             </button>
           </div>
 

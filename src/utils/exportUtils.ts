@@ -9,6 +9,153 @@ export const OFFICIAL_ORIGINAL_PDF_URL =
   '/assets/aistudio/NOVO_ORGANOGRAMA_V1_CPI_2026_-_NOVA_ORGANIZA__O_DO_CPI_-_ORGANOGRAMA_ATUALIZADO_17876c8b.pdf';
 
 // ============================================================================
+// OKLCH & MODERN COLOR SANITIZER FOR HTML2CANVAS
+// ============================================================================
+
+let dummyCanvas: HTMLCanvasElement | null = null;
+let dummyCtx: CanvasRenderingContext2D | null = null;
+
+/**
+ * Converts modern CSS color functions (like Tailwind v4 oklch(...) or color(...))
+ * to standard rgb(...) using the browser's native Canvas 2D engine.
+ * Prevents: 'Attempting to parse an unsupported color function "oklch"'.
+ */
+export function convertOklchToRgb(str: string): string {
+  if (!str || typeof str !== 'string') return str;
+  if (!str.includes('oklch') && !str.includes('color(')) return str;
+
+  if (typeof document !== 'undefined') {
+    if (!dummyCanvas) {
+      dummyCanvas = document.createElement('canvas');
+      dummyCanvas.width = 1;
+      dummyCanvas.height = 1;
+      dummyCtx = dummyCanvas.getContext('2d');
+    }
+  }
+
+  return str.replace(/oklch\([^)]+\)/gi, (match) => {
+    try {
+      if (dummyCtx) {
+        dummyCtx.fillStyle = '#ffffff';
+        dummyCtx.fillStyle = match;
+        const result = dummyCtx.fillStyle;
+        if (result && !result.includes('oklch')) {
+          return result;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    // Fallback standard colors if canvas translation encounters error
+    if (match.includes('0.208') || match.includes('slate-900') || match.includes('black')) return '#0f172a';
+    if (match.includes('0.696') || match.includes('emerald') || match.includes('green')) return '#005a2b';
+    return '#ffffff';
+  });
+}
+
+/**
+ * Safe wrapper around html2canvas that intercepts getComputedStyle and cloned stylesheets,
+ * guaranteeing html2canvas never encounters an oklch(...) color value.
+ */
+export async function safeHtml2Canvas(element: HTMLElement, options: any = {}): Promise<HTMLCanvasElement> {
+  const originalGetComputedStyle = typeof window !== 'undefined' ? window.getComputedStyle : null;
+
+  // Intercept main window.getComputedStyle during capture
+  if (originalGetComputedStyle && typeof window !== 'undefined') {
+    window.getComputedStyle = function(elt: Element, pseudoElt?: string | null) {
+      const style = originalGetComputedStyle.call(window, elt, pseudoElt);
+      return new Proxy(style, {
+        get(target, prop, receiver) {
+          const val = Reflect.get(target, prop, receiver);
+          if (typeof val === 'string' && (val.includes('oklch') || val.includes('color('))) {
+            return convertOklchToRgb(val);
+          }
+          if (typeof val === 'function' && prop === 'getPropertyValue') {
+            return (propertyName: string) => {
+              const res = target.getPropertyValue(propertyName);
+              if (typeof res === 'string' && (res.includes('oklch') || res.includes('color('))) {
+                return convertOklchToRgb(res);
+              }
+              return res;
+            };
+          }
+          return val;
+        }
+      });
+    };
+  }
+
+  try {
+    const userOnClone = options.onclone;
+    const mergedOptions = {
+      ...options,
+      onclone: (clonedDoc: Document, clonedEl: HTMLElement) => {
+        // 1. Sanitize all <style> elements in the cloned document
+        const styles = clonedDoc.querySelectorAll('style');
+        styles.forEach((styleTag) => {
+          if (styleTag.textContent && (styleTag.textContent.includes('oklch') || styleTag.textContent.includes('color('))) {
+            styleTag.textContent = convertOklchToRgb(styleTag.textContent);
+          }
+        });
+
+        // 2. Intercept getComputedStyle in the cloned document's iframe window
+        const iframeWin = clonedDoc.defaultView || window;
+        if (iframeWin && iframeWin.getComputedStyle) {
+          const iframeGetComputedStyle = iframeWin.getComputedStyle.bind(iframeWin);
+          iframeWin.getComputedStyle = function(elt: Element, pseudoElt?: string | null) {
+            const style = iframeGetComputedStyle(elt, pseudoElt);
+            return new Proxy(style, {
+              get(target, prop, receiver) {
+                const val = Reflect.get(target, prop, receiver);
+                if (typeof val === 'string' && (val.includes('oklch') || val.includes('color('))) {
+                  return convertOklchToRgb(val);
+                }
+                if (typeof val === 'function' && prop === 'getPropertyValue') {
+                  return (propertyName: string) => {
+                    const res = target.getPropertyValue(propertyName);
+                    if (typeof res === 'string' && (res.includes('oklch') || res.includes('color('))) {
+                      return convertOklchToRgb(res);
+                    }
+                    return res;
+                  };
+                }
+                return val;
+              }
+            });
+          };
+        }
+
+        // 3. Ensure target element and its ancestors are completely visible in cloned iframe
+        if (clonedEl) {
+          let p: HTMLElement | null = clonedEl.parentElement;
+          while (p && p !== clonedDoc.body) {
+            p.style.width = 'auto';
+            p.style.height = 'auto';
+            p.style.overflow = 'visible';
+            p.style.opacity = '1';
+            p.style.visibility = 'visible';
+            p = p.parentElement;
+          }
+          clonedEl.style.opacity = '1';
+          clonedEl.style.visibility = 'visible';
+          clonedEl.style.display = 'block';
+        }
+
+        if (userOnClone) {
+          userOnClone(clonedDoc, clonedEl);
+        }
+      }
+    };
+
+    return await html2canvas(element, mergedOptions);
+  } finally {
+    if (originalGetComputedStyle && typeof window !== 'undefined') {
+      window.getComputedStyle = originalGetComputedStyle;
+    }
+  }
+}
+
+// ============================================================================
 // VERSÃO 1: MODELO GRÁFICO OFICIAL (IDÊNTICO AO PDF ANEXO)
 // ============================================================================
 
@@ -28,14 +175,28 @@ export async function exportVisualOrganogramPdf(
     throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
   }
 
-  // Render element at high resolution
-  const canvas = await html2canvas(element, {
-    scale: 2.5,
-    useCORS: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-    windowWidth: 1600,
-  });
+  let canvas: HTMLCanvasElement;
+  try {
+    canvas = await safeHtml2Canvas(element, {
+      scale: 2.2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      windowWidth: 1600,
+    });
+  } catch (err: any) {
+    console.warn('safeHtml2Canvas encontrou aviso, acionando fallback de alta fidelidade:', err);
+    // Fallback: trigger direct download of the official high-res PDF file
+    const link = document.createElement('a');
+    link.href = OFFICIAL_ORIGINAL_PDF_URL;
+    link.download = filename;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return;
+  }
 
   const imgData = canvas.toDataURL('image/jpeg', 0.98);
 
@@ -81,9 +242,10 @@ export async function exportVisualOrganogramPng(
     throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
   }
 
-  const canvas = await html2canvas(element, {
-    scale: 2.5, // 2.5x gives ultra-crisp ~3950px wide image
+  const canvas = await safeHtml2Canvas(element, {
+    scale: 2.2, // 2.2x gives ultra-crisp ~3500px wide image
     useCORS: true,
+    allowTaint: true,
     backgroundColor: '#ffffff',
     logging: false,
     windowWidth: 1600,
@@ -274,9 +436,10 @@ export async function exportCadastralReportPng(
     throw new Error('Elemento do relatório cadastral não encontrado para captura.');
   }
 
-  const canvas = await html2canvas(element, {
+  const canvas = await safeHtml2Canvas(element, {
     scale: 2,
     useCORS: true,
+    allowTaint: true,
     backgroundColor: '#ffffff',
     logging: false,
   });
