@@ -10,7 +10,8 @@ import { OrganogramDatabase, SubordinateUnit, GrandCommand, AIAnalysisReport, Un
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
+// Port 3000 is required by the environment; port 8080 is reserved for Nginx.
+const PORT = (process.env.PORT && process.env.PORT !== '8080') ? Number(process.env.PORT) : 3000;
 const isProduction = process.env.NODE_ENV === 'production';
 
 // Allow large payloads for high-resolution screenshots/prints

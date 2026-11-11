@@ -3,21 +3,90 @@ import html2canvas from 'html2canvas';
 import { OrganogramDatabase } from '../types/organogram';
 
 /**
- * Exports a specific DOM element as a high-resolution PNG image
+ * URL for the original official PDF uploaded by the user
  */
-export async function exportElementAsPng(elementId: string, filename = 'organograma_institucional_2026.png'): Promise<void> {
-  const element = document.getElementById(elementId);
+export const OFFICIAL_ORIGINAL_PDF_URL =
+  '/assets/aistudio/NOVO_ORGANOGRAMA_V1_CPI_2026_-_NOVA_ORGANIZA__O_DO_CPI_-_ORGANOGRAMA_ATUALIZADO_17876c8b.pdf';
+
+// ============================================================================
+// VERSÃO 1: MODELO GRÁFICO OFICIAL (IDÊNTICO AO PDF ANEXO)
+// ============================================================================
+
+/**
+ * Exports the visual 9-columns organogram sheet as a high-definition landscape PDF
+ * perfectly fitted onto a single landscape page (A3 landscape for maximum sharpness).
+ */
+export async function exportVisualOrganogramPdf(
+  elementId = 'official-pdf-model-sheet',
+  filename = 'ORGANOGRAMA_CPI_2026_MODELO_OFICIAL.pdf'
+): Promise<void> {
+  let element = document.getElementById(elementId);
   if (!element) {
-    throw new Error('Elemento do organograma não encontrado para captura.');
+    element = document.getElementById('organogram-canvas-container');
+  }
+  if (!element) {
+    throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
   }
 
+  // Render element at high resolution
   const canvas = await html2canvas(element, {
-    scale: 2, // High resolution
+    scale: 2.5,
     useCORS: true,
     backgroundColor: '#ffffff',
     logging: false,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
+    windowWidth: 1600,
+  });
+
+  const imgData = canvas.toDataURL('image/jpeg', 0.98);
+
+  // A3 Landscape (420mm x 297mm) guarantees high legibility for 9 columns
+  const pdf = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'a3',
+  });
+
+  const pdfWidth = pdf.internal.pageSize.getWidth();
+  const pdfHeight = pdf.internal.pageSize.getHeight();
+
+  // Compute dimensions preserving aspect ratio
+  const imgWidth = canvas.width;
+  const imgHeight = canvas.height;
+  const margin = 8; // 8mm margins
+  const usableWidth = pdfWidth - margin * 2;
+  const usableHeight = pdfHeight - margin * 2;
+
+  const ratio = Math.min(usableWidth / imgWidth, usableHeight / imgHeight);
+  const finalWidth = imgWidth * ratio;
+  const finalHeight = imgHeight * ratio;
+  const posX = (pdfWidth - finalWidth) / 2;
+  const posY = (pdfHeight - finalHeight) / 2;
+
+  pdf.addImage(imgData, 'JPEG', posX, posY, finalWidth, finalHeight, undefined, 'FAST');
+  pdf.save(filename);
+}
+
+/**
+ * Exports the visual 9-columns organogram sheet as a high-resolution PNG image
+ */
+export async function exportVisualOrganogramPng(
+  elementId = 'official-pdf-model-sheet',
+  filename = 'ORGANOGRAMA_CPI_2026_MODELO_OFICIAL.png'
+): Promise<void> {
+  let element = document.getElementById(elementId);
+  if (!element) {
+    element = document.getElementById('organogram-canvas-container');
+  }
+  if (!element) {
+    throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
+  }
+
+  const canvas = await html2canvas(element, {
+    scale: 2.5, // 2.5x gives ultra-crisp ~3950px wide image
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    logging: false,
+    windowWidth: 1600,
   });
 
   const dataUrl = canvas.toDataURL('image/png');
@@ -29,10 +98,18 @@ export async function exportElementAsPng(elementId: string, filename = 'organogr
   document.body.removeChild(link);
 }
 
+// ============================================================================
+// VERSÃO 2: RELATÓRIO CADASTRAL E OPERACIONAL (VERSÃO EXISTENTE NO SISTEMA)
+// ============================================================================
+
 /**
- * Generates an official Institutional PDF Report of the Organogram
+ * Generates the existing official Institutional Cadastral PDF Report
+ * Multi-page structured report with all unit lists, commands, commanders and contacts
  */
-export function exportOrganogramReportPdf(db: OrganogramDatabase, filename = 'relatorio_organograma_2026.pdf'): void {
+export function exportCadastralReportPdf(
+  db: OrganogramDatabase,
+  filename = 'RELATORIO_CADASTRAL_CPI_PMMA_2026.pdf'
+): void {
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
@@ -48,19 +125,34 @@ export function exportOrganogramReportPdf(db: OrganogramDatabase, filename = 're
 
   // Header Title
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(14);
+  doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  doc.text('POLÍCIA MILITAR DO MARANHÃO - COMANDO DO POLICIAMENTO DO INTERIOR', pageWidth / 2, 9, { align: 'center' });
+  doc.text(
+    'POLÍCIA MILITAR DO MARANHÃO - COMANDO DO POLICIAMENTO DO INTERIOR (CPI)',
+    pageWidth / 2,
+    9,
+    { align: 'center' }
+  );
 
-  doc.setFontSize(10);
+  doc.setFontSize(9.5);
   doc.setFont('helvetica', 'normal');
-  doc.text('ORGANOGRAMA INSTITUCIONAL DE GRANDES COMANDOS E UNIDADES SUBORDINADAS – 2026', pageWidth / 2, 16, { align: 'center' });
+  doc.text(
+    'RELATÓRIO OPERACIONAL E CADASTRAL DE GRANDES COMANDOS E UNIDADES SUBORDINADAS – 2026',
+    pageWidth / 2,
+    15.5,
+    { align: 'center' }
+  );
 
   doc.setFontSize(8);
-  doc.text(`Atualização: ${db.lastUpdated} | Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, pageWidth / 2, 21, { align: 'center' });
+  doc.text(
+    `Atualização: ${db.lastUpdated || db.topCommand.dataAtualizacao || '11/11/2026'} | Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+    pageWidth / 2,
+    21,
+    { align: 'center' }
+  );
 
   // Body
-  let y = 32;
+  let y = 30;
   doc.setTextColor(20, 20, 20);
 
   // Summary box
@@ -71,15 +163,20 @@ export function exportOrganogramReportPdf(db: OrganogramDatabase, filename = 're
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  doc.text('QUADRO DE DISTRIBUIÇÃO OPERACIONAL:', 14, y + 6);
+  doc.text('QUADRO DE DISTRIBUIÇÃO OPERACIONAL DO CPI:', 14, y + 6);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Grandes Comandos (CPAI): ${db.commands.length} | Total de Unidades Operacionais (BPM/CIPM): ${db.units.length} | Sede: ${db.topCommand.sede}`, 14, y + 11);
+  doc.setFontSize(8.5);
+  doc.text(
+    `Grandes Comandos (CPAI): ${db.commands.length} | Total de Unidades Operacionais (BPM/CIPM): ${db.units.length} | Comandante Geral: ${db.topCommand.comandanteGeral}`,
+    14,
+    y + 11.5
+  );
 
   y += 22;
 
   // Render Commands and their units in structured columns/tables
-  db.commands.forEach((cmd, idx) => {
-    const cmdUnits = db.units.filter(u => u.grandCommandId === cmd.id);
+  db.commands.forEach((cmd) => {
+    const cmdUnits = db.units.filter((u) => u.grandCommandId === cmd.id);
 
     // Check if new page needed
     if (y > pageHeight - 35) {
@@ -95,7 +192,10 @@ export function exportOrganogramReportPdf(db: OrganogramDatabase, filename = 're
     doc.setFont('helvetica', 'bold');
     doc.text(`${cmd.sigla} - ${cmd.nome.toUpperCase()} (Sede: ${cmd.municipioSede})`, 13, y + 5);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Cmdte: ${cmd.comandante} | Contato: ${cmd.telefone}`, pageWidth - 14, y + 5, { align: 'right' });
+    doc.setFontSize(8);
+    doc.text(`Cmdte: ${cmd.comandante} | Contato: ${cmd.telefone}`, pageWidth - 14, y + 5, {
+      align: 'right',
+    });
 
     y += 8;
 
@@ -151,11 +251,51 @@ export function exportOrganogramReportPdf(db: OrganogramDatabase, filename = 're
     doc.setPage(i);
     doc.setTextColor(100, 100, 100);
     doc.setFontSize(7);
-    doc.text(`Polícia Militar do Maranhão - CPI - Documento Oficial 2026 - Página ${i} de ${totalPages}`, pageWidth / 2, pageHeight - 5, { align: 'center' });
+    doc.text(
+      `Polícia Militar do Maranhão - CPI - Documento Oficial 2026 - Página ${i} de ${totalPages}`,
+      pageWidth / 2,
+      pageHeight - 5,
+      { align: 'center' }
+    );
   }
 
   doc.save(filename);
 }
+
+/**
+ * Captures an element (like the printable report) as PNG image
+ */
+export async function exportCadastralReportPng(
+  elementId = 'report-printable-area',
+  filename = 'RELATORIO_CADASTRAL_CPI_PMMA_2026.png'
+): Promise<void> {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    throw new Error('Elemento do relatório cadastral não encontrado para captura.');
+  }
+
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    logging: false,
+  });
+
+  const dataUrl = canvas.toDataURL('image/png');
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ============================================================================
+// ALIASES PARA COMPATIBILIDADE ANTERIOR
+// ============================================================================
+
+export const exportOrganogramReportPdf = exportCadastralReportPdf;
+export const exportElementAsPng = exportVisualOrganogramPng;
 
 /**
  * Triggers native browser print formatted with institutional styles

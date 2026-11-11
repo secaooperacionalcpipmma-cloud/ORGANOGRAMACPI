@@ -9,9 +9,23 @@ import {
   Users, 
   MapPin, 
   Search, 
-  Shield 
+  Shield,
+  Layers,
+  Sparkles,
+  ExternalLink,
+  Download,
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
-import { exportOrganogramReportPdf, exportElementAsPng, printOrganogram } from '../utils/exportUtils';
+import { 
+  exportVisualOrganogramPdf,
+  exportVisualOrganogramPng,
+  exportCadastralReportPdf, 
+  exportCadastralReportPng, 
+  OFFICIAL_ORIGINAL_PDF_URL,
+  printOrganogram 
+} from '../utils/exportUtils';
+import { ExportModal } from './ExportModal';
 
 interface ReportsViewProps {
   database: OrganogramDatabase;
@@ -23,6 +37,13 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
   const [activeReport, setActiveReport] = useState<ReportSubTab>('comandos');
   const [filterText, setFilterText] = useState('');
   const [isExporting, setIsExporting] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportFeedback, setExportFeedback] = useState<string | null>(null);
+
+  const showFeedback = (msg: string) => {
+    setExportFeedback(msg);
+    setTimeout(() => setExportFeedback(null), 4000);
+  };
 
   // Group by municipality
   const municipalityMap = new Map<string, string[]>();
@@ -47,19 +68,47 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
 
   const sortedMunicipalities = Array.from(municipalityMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
-  const handlePdf = () => {
+  // Version 1: Visual Model handlers (PDF Anexo)
+  const handleVisualPdf = async () => {
     setIsExporting(true);
     try {
-      exportOrganogramReportPdf(database);
+      await exportVisualOrganogramPdf('official-pdf-model-sheet');
+      showFeedback('PDF do Modelo Gráfico Oficial (Anexo) baixado com sucesso!');
+    } catch (e: any) {
+      alert(`Erro: ${e.message}`);
     } finally {
       setIsExporting(false);
     }
   };
 
-  const handlePng = async () => {
+  const handleVisualPng = async () => {
     setIsExporting(true);
     try {
-      await exportElementAsPng('report-printable-area');
+      await exportVisualOrganogramPng('official-pdf-model-sheet');
+      showFeedback('Imagem PNG do Modelo Gráfico Oficial baixada em alta resolução!');
+    } catch (e: any) {
+      alert(`Erro: ${e.message}`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Version 2: Cadastral Report handlers (Versão Existente)
+  const handleCadastralPdf = () => {
+    setIsExporting(true);
+    try {
+      exportCadastralReportPdf(database);
+      showFeedback('PDF do Relatório Cadastral Operacional baixado com sucesso!');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleCadastralPng = async () => {
+    setIsExporting(true);
+    try {
+      await exportCadastralReportPng('report-printable-area');
+      showFeedback('Imagem PNG do Relatório Cadastral baixada!');
     } catch (e) {
       console.error(e);
     } finally {
@@ -67,42 +116,43 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
     }
   };
 
+  const handleDownloadOriginalPdf = () => {
+    const link = document.createElement('a');
+    link.href = OFFICIAL_ORIGINAL_PDF_URL;
+    link.download = 'NOVO_ORGANOGRAMA_V1_CPI_2026_ORGANOGRAMA_ATUALIZADO.pdf';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showFeedback('Download do arquivo PDF original anexo iniciado!');
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-      {/* Top Banner */}
+      {/* Top Banner with Dual Version Download Cards */}
       <div className="bg-white border-2 border-black rounded-lg shadow-sm p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
           <div className="flex items-center space-x-3">
             <div className="p-3 bg-emerald-100 text-[#005a2b] rounded-lg border border-emerald-300">
-              <FileText className="w-6 h-6 text-[#005a2b]" />
+              <Download className="w-6 h-6 text-[#005a2b]" />
             </div>
             <div>
               <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">
-                RELATÓRIOS ESTATÍSTICOS E EXPORTAÇÃO OFICIAL
+                CENTRAL DE DOWNLOADS E EXPORTAÇÃO OFICIAL (2026)
               </h2>
               <p className="text-xs text-slate-600 font-medium">
-                Gere documentos executivos em PDF com diagramação oficial da PMMA, exporte capturas em PNG de alta fidelidade ou consulte relatórios por Comando, Comandante e Município.
+                Baixe o organograma nas 2 versões oficiais disponíveis: o <strong>Modelo Gráfico 9 Colunas (PDF Anexo)</strong> ou o <strong>Relatório Cadastral Tabular (Versão Existente)</strong> em PDF e Imagem PNG.
               </p>
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
             <button
-              onClick={handlePdf}
-              disabled={isExporting}
-              className="px-3.5 py-2 bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold rounded shadow-xs flex items-center space-x-1.5 transition-colors"
+              onClick={() => setIsExportModalOpen(true)}
+              className="px-3.5 py-2 bg-[#005a2b] hover:bg-[#004722] text-white text-xs font-bold rounded shadow-xs flex items-center space-x-1.5 transition-colors"
             >
-              <FileDown className="w-4 h-4" />
-              <span>Exportar PDF Oficial</span>
-            </button>
-
-            <button
-              onClick={handlePng}
-              disabled={isExporting}
-              className="px-3.5 py-2 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded shadow-xs flex items-center space-x-1.5 transition-colors"
-            >
-              <ImageIcon className="w-4 h-4" />
-              <span>Baixar PNG</span>
+              <Download className="w-4 h-4" />
+              <span>Abrir Central de Exportação</span>
             </button>
 
             <button
@@ -112,6 +162,106 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
               <Printer className="w-4 h-4" />
               <span>Imprimir</span>
             </button>
+          </div>
+        </div>
+
+        {/* Feedback Alert Banner */}
+        {exportFeedback && (
+          <div className="mt-3 bg-emerald-50 border border-emerald-300 px-3 py-2 rounded-md flex items-center space-x-2 text-xs font-bold text-emerald-800 animate-in fade-in">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <span>{exportFeedback}</span>
+          </div>
+        )}
+
+        {/* DUAL VERSION CARDS (Modelo Anexo vs Relatório Cadastral) */}
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Card 1: Modelo Gráfico Oficial (PDF Anexo) */}
+          <div className="bg-emerald-50/60 border-2 border-[#005a2b] rounded-lg p-4 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-2 border-b border-emerald-200">
+                <div className="flex items-center space-x-2">
+                  <Layers className="w-4 h-4 text-[#005a2b]" />
+                  <span className="font-black text-xs text-slate-900 uppercase">
+                    Versão 1: Modelo Gráfico Oficial (PDF Anexo)
+                  </span>
+                </div>
+                <span className="bg-[#005a2b] text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">
+                  Modelo Anexo
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Prancha visual panorâmica idêntica ao documento PDF anexado, com 9 colunas completas, todos os emblemas institucionais, caixas hierárquicas, bloco CPE e quadro de Comandantes de Área.
+              </p>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-emerald-200 flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleVisualPdf}
+                disabled={isExporting}
+                className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                <span>Baixar PDF (Prancha Oficial)</span>
+              </button>
+
+              <button
+                onClick={handleVisualPng}
+                disabled={isExporting}
+                className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Baixar Imagem PNG</span>
+              </button>
+
+              <button
+                onClick={handleDownloadOriginalPdf}
+                className="px-2.5 py-1.5 bg-white hover:bg-emerald-100 text-[#005a2b] border border-emerald-400 text-[11px] font-bold rounded flex items-center space-x-1 transition-colors"
+                title="Download direto do PDF original anexo"
+              >
+                <ExternalLink className="w-3 h-3" />
+                <span>PDF Original Anexo</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Card 2: Relatório Cadastral Operacional (Versão Existente) */}
+          <div className="bg-slate-50 border-2 border-slate-300 rounded-lg p-4 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                <div className="flex items-center space-x-2">
+                  <FileText className="w-4 h-4 text-slate-700" />
+                  <span className="font-black text-xs text-slate-900 uppercase">
+                    Versão 2: Relatório Cadastral (Existente)
+                  </span>
+                </div>
+                <span className="bg-slate-700 text-white text-[9px] font-black px-2 py-0.5 rounded uppercase">
+                  Cadastral
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
+                Relatório analítico multipágina tabular para despacho administrativo, contendo catálogo completo de unidades, distribuição regional, municípios, comandantes, telefones e e-mails.
+              </p>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-200 flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleCadastralPdf}
+                disabled={isExporting}
+                className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                <span>Baixar PDF (Relatório Cadastral)</span>
+              </button>
+
+              <button
+                onClick={handleCadastralPng}
+                disabled={isExporting}
+                className="px-3 py-1.5 bg-blue-700 hover:bg-blue-800 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-2xs transition-colors"
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                <span>Baixar Imagem PNG</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -356,6 +506,14 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
           </div>
         )}
       </div>
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        database={database}
+        initialFormat="all"
+      />
     </div>
   );
 };

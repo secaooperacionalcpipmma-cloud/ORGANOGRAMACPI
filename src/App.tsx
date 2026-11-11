@@ -18,7 +18,15 @@ import { EmblemsManager } from './components/EmblemsManager';
 import { ReportsView } from './components/ReportsView';
 import { HistoryView } from './components/HistoryView';
 import { AdminLoginModal } from './components/AdminLoginModal';
-import { exportOrganogramReportPdf, exportElementAsPng, printOrganogram } from './utils/exportUtils';
+import { ExportModal } from './components/ExportModal';
+import { OfficialPdfModelSheet } from './components/OfficialPdfModelSheet';
+import { 
+  exportVisualOrganogramPdf, 
+  exportVisualOrganogramPng, 
+  exportCadastralReportPdf, 
+  exportCadastralReportPng, 
+  printOrganogram 
+} from './utils/exportUtils';
 import { 
   ShieldAlert, 
   Building, 
@@ -53,6 +61,8 @@ export default function App() {
   const [isCommandEditModalOpen, setIsCommandEditModalOpen] = useState<boolean>(false);
 
   const [isAdminLoginOpen, setIsAdminLoginOpen] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [exportModalFormat, setExportModalFormat] = useState<'all' | 'pdf' | 'png'>('all');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
@@ -215,25 +225,52 @@ export default function App() {
     }
   };
 
-  // Export handlers
-  const handleExportPdf = () => {
+  // Export handlers for Dual Versions (Visual Model from PDF Anexo + Cadastral Report)
+  const handleExportVisualPdf = async () => {
     setIsExporting(true);
     try {
-      exportOrganogramReportPdf(database);
+      await exportVisualOrganogramPdf('official-pdf-model-sheet');
+    } catch (e: any) {
+      alert(`Erro ao exportar PDF do modelo oficial: ${e.message}`);
     } finally {
       setIsExporting(false);
     }
   };
 
-  const handleExportPng = async () => {
+  const handleExportVisualPng = async () => {
     setIsExporting(true);
     try {
-      await exportElementAsPng('organogram-canvas-container');
-    } catch (e) {
-      alert('Erro ao gerar PNG.');
+      await exportVisualOrganogramPng('official-pdf-model-sheet');
+    } catch (e: any) {
+      alert(`Erro ao exportar PNG do modelo oficial: ${e.message}`);
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleExportCadastralPdf = () => {
+    setIsExporting(true);
+    try {
+      exportCadastralReportPdf(database);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportCadastralPng = async () => {
+    setIsExporting(true);
+    try {
+      await exportCadastralReportPng('report-printable-area');
+    } catch (e: any) {
+      alert(`Erro ao exportar PNG do relatório: ${e.message}`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleOpenExportModal = (format: 'all' | 'pdf' | 'png' = 'all') => {
+    setExportModalFormat(format);
+    setIsExportModalOpen(true);
   };
 
   const handlePrint = () => {
@@ -263,8 +300,11 @@ export default function App() {
         topCommand={database.topCommand}
         role={role}
         onToggleRole={() => setIsAdminLoginOpen(true)}
-        onExportPdf={handleExportPdf}
-        onExportPng={handleExportPng}
+        onExportVisualPdf={handleExportVisualPdf}
+        onExportCadastralPdf={handleExportCadastralPdf}
+        onExportVisualPng={handleExportVisualPng}
+        onExportCadastralPng={handleExportCadastralPng}
+        onOpenExportModal={handleOpenExportModal}
         onPrint={handlePrint}
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -603,6 +643,29 @@ export default function App() {
         isOpen={isAdminLoginOpen}
         onClose={() => setIsAdminLoginOpen(false)}
         onSetRole={setRole}
+      />
+
+      {/* Offscreen High-Resolution Render Sheet for Pristine PDF/PNG Capture of the Attached Model */}
+      <div 
+        style={{ 
+          position: 'fixed', 
+          left: '-99999px', 
+          top: '0', 
+          pointerEvents: 'none', 
+          zIndex: -100, 
+          width: '1580px' 
+        }} 
+        aria-hidden="true"
+      >
+        <OfficialPdfModelSheet database={database} id="official-pdf-model-sheet" />
+      </div>
+
+      {/* Export Modal with Both Versions (Attached Model & Existing Cadastral Report) */}
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        database={database}
+        initialFormat={exportModalFormat}
       />
     </div>
   );

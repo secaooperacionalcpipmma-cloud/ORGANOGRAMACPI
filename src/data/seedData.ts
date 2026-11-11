@@ -10,7 +10,7 @@ export const initialTopCommand: TopCommandInfo = {
   sede: 'São Luís - MA (Quartel do Comando Geral)',
   contato: '(98) 99110-8830',
   email: 'secaooperacional.cpi.pmma@gmail.com',
-  dataAtualizacao: '05/11/2026',
+  dataAtualizacao: '11/11/2026',
   emblemaPrincipalUrl: '/assets/aistudio/CPI_8bc02a05.jpg'
 };
 
