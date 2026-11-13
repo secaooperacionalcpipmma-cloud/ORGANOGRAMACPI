@@ -1,5 +1,6 @@
 import React from 'react';
 import { TopCommandInfo, UserRole } from '../types/organogram';
+import { getCurrentDateBR } from '../utils/dateUtils';
 import { 
   Shield, 
   Printer, 
@@ -80,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
           </span>
           <span className="flex items-center space-x-1 bg-[#004722] px-2 py-0.5 rounded text-[10px] sm:text-[11px] whitespace-nowrap">
             <Clock className="w-3 h-3 text-amber-300" />
-            <span>{topCommand.dataAtualizacao}</span>
+            <span>{getCurrentDateBR()}</span>
           </span>
         </div>
       </div>

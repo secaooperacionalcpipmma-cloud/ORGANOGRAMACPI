@@ -1,5 +1,6 @@
 import React from 'react';
 import { OrganogramDatabase } from '../types/organogram';
+import { getCurrentDateBR } from '../utils/dateUtils';
 
 interface CadastralReportSheetProps {
   database: OrganogramDatabase;
@@ -17,11 +18,9 @@ export const CadastralReportSheet: React.FC<CadastralReportSheetProps> = ({
 }) => {
   const { topCommand, commands, units } = database;
   const sortedCommands = [...commands].sort((a, b) => a.ordem - b.ordem);
+  const currentDateBR = getCurrentDateBR();
 
-  const fontSans =
-    'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-  const fontMono =
-    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+  const fontSans = 'Arial, Helvetica, sans-serif';
 
   return (
     <div
@@ -92,12 +91,14 @@ export const CadastralReportSheet: React.FC<CadastralReportSheetProps> = ({
             padding: '8px 14px',
             borderRadius: '6px',
             fontSize: '11px',
+            lineHeight: '16px',
             fontWeight: 900,
             textAlign: 'center',
-            whiteSpace: 'nowrap'
+            whiteSpace: 'nowrap',
+            fontVariantNumeric: 'tabular-nums'
           }}
         >
-          ATUALIZAÇÃO: {topCommand.dataAtualizacao || '11/11/2026'}
+          ATUALIZAÇÃO: {currentDateBR}
         </div>
       </div>
 
@@ -113,7 +114,7 @@ export const CadastralReportSheet: React.FC<CadastralReportSheetProps> = ({
                 backgroundColor: '#ffffff',
                 border: '2px solid #000000',
                 borderRadius: '8px',
-                overflow: 'hidden',
+                overflow: 'visible',
                 boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
               }}
             >
@@ -199,8 +200,11 @@ export const CadastralReportSheet: React.FC<CadastralReportSheetProps> = ({
                   width: '100%',
                   textAlign: 'left',
                   fontSize: '12px',
-                  borderCollapse: 'collapse',
-                  backgroundColor: '#ffffff'
+                  lineHeight: '18px',
+                  borderCollapse: 'separate',
+                  borderSpacing: 0,
+                  backgroundColor: '#ffffff',
+                  fontFamily: fontSans
                 }}
               >
                 <thead>
@@ -211,52 +215,55 @@ export const CadastralReportSheet: React.FC<CadastralReportSheetProps> = ({
                       fontWeight: 700,
                       textTransform: 'uppercase',
                       fontSize: '10px',
-                      borderBottom: '1px solid #e2e8f0'
+                      lineHeight: '16px'
                     }}
                   >
-                    <th style={{ padding: '8px 12px', width: '16%' }}>Unidade</th>
-                    <th style={{ padding: '8px 12px', width: '14%' }}>Tipo</th>
-                    <th style={{ padding: '8px 12px', width: '20%' }}>Município Sede</th>
-                    <th style={{ padding: '8px 12px', width: '24%' }}>Comandante</th>
-                    <th style={{ padding: '8px 12px', width: '14%' }}>Telefone</th>
-                    <th style={{ padding: '8px 12px', width: '12%' }}>E-mail</th>
+                    <th style={{ padding: '8px 12px', width: '16%', borderBottom: '1px solid #e2e8f0' }}>Unidade</th>
+                    <th style={{ padding: '8px 12px', width: '14%', borderBottom: '1px solid #e2e8f0' }}>Tipo</th>
+                    <th style={{ padding: '8px 12px', width: '20%', borderBottom: '1px solid #e2e8f0' }}>Município Sede</th>
+                    <th style={{ padding: '8px 12px', width: '24%', borderBottom: '1px solid #e2e8f0' }}>Comandante</th>
+                    <th style={{ padding: '8px 12px', width: '14%', borderBottom: '1px solid #e2e8f0' }}>Telefone</th>
+                    <th style={{ padding: '8px 12px', width: '12%', borderBottom: '1px solid #e2e8f0' }}>E-mail</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {cmdUnits.map((u, idx) => (
-                    <tr
-                      key={u.id}
-                      style={{
-                        backgroundColor: idx % 2 === 1 ? '#f8fafc' : '#ffffff',
-                        borderBottom: idx < cmdUnits.length - 1 ? '1px solid #f1f5f9' : 'none',
-                        color: '#1e293b'
-                      }}
-                    >
-                      <td style={{ padding: '8px 12px', fontWeight: 800, color: '#005a2b' }}>
-                        {u.identificacao}
-                      </td>
-                      <td style={{ padding: '8px 12px', fontWeight: 500 }}>{u.tipo}</td>
-                      <td style={{ padding: '8px 12px', fontWeight: 700, color: '#0f172a' }}>
-                        {u.municipio}
-                      </td>
-                      <td style={{ padding: '8px 12px', fontWeight: 900, color: '#0f172a' }}>
-                        {u.emRegulamentacao ? 'EM REGULAMENTAÇÃO' : u.comandante}
-                      </td>
-                      <td style={{ padding: '8px 12px', fontFamily: fontMono }}>
-                        {u.telefone || '-'}
-                      </td>
-                      <td
+                  {cmdUnits.map((u, idx) => {
+                    const rowBorder = idx < cmdUnits.length - 1 ? '1px solid #f1f5f9' : 'none';
+                    return (
+                      <tr
+                        key={u.id}
                         style={{
-                          padding: '8px 12px',
-                          color: '#64748b',
-                          fontFamily: fontMono,
-                          fontSize: '11px'
+                          backgroundColor: idx % 2 === 1 ? '#f8fafc' : '#ffffff',
+                          color: '#1e293b'
                         }}
                       >
-                        {u.email || '-'}
-                      </td>
-                    </tr>
-                  ))}
+                        <td style={{ padding: '8px 12px', fontWeight: 800, color: '#005a2b', borderBottom: rowBorder }}>
+                          {u.identificacao}
+                        </td>
+                        <td style={{ padding: '8px 12px', fontWeight: 500, borderBottom: rowBorder }}>{u.tipo}</td>
+                        <td style={{ padding: '8px 12px', fontWeight: 700, color: '#0f172a', borderBottom: rowBorder }}>
+                          {u.municipio}
+                        </td>
+                        <td style={{ padding: '8px 12px', fontWeight: 900, color: '#0f172a', borderBottom: rowBorder }}>
+                          {u.emRegulamentacao ? 'EM REGULAMENTAÇÃO' : u.comandante}
+                        </td>
+                        <td style={{ padding: '8px 12px', fontFamily: fontSans, fontVariantNumeric: 'tabular-nums', borderBottom: rowBorder }}>
+                          {u.telefone || '-'}
+                        </td>
+                        <td
+                          style={{
+                            padding: '8px 12px',
+                            color: '#64748b',
+                            fontFamily: fontSans,
+                            fontSize: '11px',
+                            borderBottom: rowBorder
+                          }}
+                        >
+                          {u.email || '-'}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

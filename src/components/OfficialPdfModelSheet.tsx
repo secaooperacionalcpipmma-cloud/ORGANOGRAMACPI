@@ -1,6 +1,7 @@
 import React from 'react';
 import { OrganogramDatabase } from '../types/organogram';
 import { initialCpeSpecialUnit } from '../data/seedData';
+import { getCurrentDateBR } from '../utils/dateUtils';
 
 interface OfficialPdfModelSheetProps {
   database: OrganogramDatabase;
@@ -11,8 +12,8 @@ interface OfficialPdfModelSheetProps {
 /**
  * Official Visual Sheet Component (FORMATO I)
  * 100% identical to the main screen "Organograma Completo - 9 Colunas (PDF)" view
- * shown on desktop (image_68fa1d9c.png), using live database data and pure inline hex styles
- * so PDF/PNG exports work reliably without oklch/CSS parser issues.
+ * shown on desktop (image_68fa1d9c.png), using live database data, current automatic date,
+ * and html2canvas-safe Arial metrics + generous cell spacing so no text or bottom row is ever clipped.
  */
 export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
   database,
@@ -23,11 +24,10 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
 
   // Ensure commands are ordered 1 to 9
   const sortedCommands = [...commands].sort((a, b) => a.ordem - b.ordem);
+  const currentDateBR = getCurrentDateBR();
 
-  const fontSans =
-    'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
-  const fontMono =
-    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+  // Explicit Arial/Helvetica font stack guarantees identical DOM & Canvas 2D metrics in html2canvas
+  const fontSans = 'Arial, Helvetica, sans-serif';
 
   return (
     <div
@@ -39,7 +39,7 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
         margin: '0 auto',
         backgroundColor: '#ffffff',
         color: '#0f172a',
-        padding: '24px',
+        padding: '28px 28px 36px 28px',
         fontFamily: fontSans,
         boxSizing: 'border-box',
         borderRadius: '6px',
@@ -59,10 +59,10 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
         <h1
           style={{
             fontSize: '30px',
-            lineHeight: '36px',
+            lineHeight: '38px',
             fontWeight: 900,
             color: '#005a2b',
-            letterSpacing: '0.05em',
+            letterSpacing: '0.04em',
             textTransform: 'uppercase',
             fontFamily: fontSans,
             margin: 0
@@ -73,12 +73,13 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
         <p
           style={{
             fontSize: '12px',
-            lineHeight: '16px',
+            lineHeight: '18px',
             fontWeight: 700,
             color: '#334155',
             letterSpacing: '0.025em',
-            margin: '2px 0 0 0',
-            textTransform: 'uppercase'
+            margin: '4px 0 0 0',
+            textTransform: 'uppercase',
+            fontFamily: fontSans
           }}
         >
           POLÍCIA MILITAR DO MARANHÃO • {topCommand.subtitulo || 'COMANDO DO POLICIAMENTO DO INTERIOR'}
@@ -86,10 +87,11 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
         <p
           style={{
             fontSize: '11px',
-            lineHeight: '16px',
+            lineHeight: '18px',
             color: '#64748b',
             fontWeight: 500,
-            margin: '2px 0 0 0'
+            margin: '2px 0 0 0',
+            fontFamily: fontSans
           }}
         >
           Comandante Geral:{' '}
@@ -169,6 +171,7 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                   <div
                     style={{
                       fontSize: '9px',
+                      lineHeight: '12px',
                       fontWeight: 700,
                       color: '#94a3b8',
                       textTransform: 'uppercase',
@@ -190,7 +193,7 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                   backgroundColor: '#ffffff',
                   border: '2px solid #000000',
                   borderRadius: '4px',
-                  padding: '8px',
+                  padding: '8px 6px',
                   textAlign: 'center',
                   boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                   boxSizing: 'border-box'
@@ -203,6 +206,7 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                     lineHeight: '16px',
                     color: '#0f172a',
                     textTransform: 'uppercase',
+                    fontFamily: fontSans,
                     margin: 0
                   }}
                 >
@@ -211,19 +215,22 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                 <p
                   style={{
                     fontWeight: 800,
-                    fontSize: '11px',
+                    fontSize: '10.5px',
+                    lineHeight: '15px',
                     color: '#0f172a',
                     textTransform: 'uppercase',
-                    margin: '2px 0 0 0',
-                    lineHeight: 1.25
+                    fontFamily: fontSans,
+                    margin: '3px 0 0 0'
                   }}
                 >
                   {command.comandante}
                 </p>
                 <p
                   style={{
-                    fontFamily: fontMono,
+                    fontFamily: fontSans,
+                    fontVariantNumeric: 'tabular-nums',
                     fontSize: '10px',
+                    lineHeight: '15px',
                     color: '#334155',
                     margin: '2px 0 0 0',
                     fontWeight: 700
@@ -256,7 +263,7 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                         backgroundColor: isDashed ? '#f8fafc' : '#ffffff',
                         border: isDashed ? '2px dashed #94a3b8' : '2px solid #000000',
                         borderRadius: '4px',
-                        padding: '8px',
+                        padding: '8px 6px',
                         textAlign: 'center',
                         boxShadow: '0 1px 1px 0 rgba(0, 0, 0, 0.04)',
                         boxSizing: 'border-box'
@@ -266,9 +273,10 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                         style={{
                           fontWeight: 900,
                           fontSize: '11px',
+                          lineHeight: '16px',
                           color: '#020617',
                           textTransform: 'uppercase',
-                          lineHeight: 1.375,
+                          fontFamily: fontSans,
                           margin: 0
                         }}
                       >
@@ -278,9 +286,10 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                         style={{
                           fontWeight: 800,
                           fontSize: '10px',
+                          lineHeight: '14px',
                           color: '#1e293b',
                           textTransform: 'uppercase',
-                          lineHeight: 1.25,
+                          fontFamily: fontSans,
                           margin: '2px 0 0 0'
                         }}
                       >
@@ -293,18 +302,21 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                             style={{
                               fontWeight: 800,
                               fontSize: '10px',
+                              lineHeight: '14px',
                               color: '#005a2b',
                               textTransform: 'uppercase',
-                              lineHeight: 1.25,
-                              margin: '2px 0 0 0'
+                              fontFamily: fontSans,
+                              margin: '3px 0 0 0'
                             }}
                           >
                             {unit.comandante}
                           </p>
                           <p
                             style={{
-                              fontFamily: fontMono,
+                              fontFamily: fontSans,
+                              fontVariantNumeric: 'tabular-nums',
                               fontSize: '10px',
+                              lineHeight: '14px',
                               color: '#334155',
                               fontWeight: 600,
                               margin: '2px 0 0 0'
@@ -350,8 +362,10 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                       style={{
                         fontWeight: 900,
                         fontSize: '12px',
+                        lineHeight: '16px',
                         color: '#0f172a',
-                        letterSpacing: '0.05em'
+                        letterSpacing: '0.05em',
+                        fontFamily: fontSans
                       }}
                     >
                       CPE
@@ -364,7 +378,7 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                       backgroundColor: '#ffffff',
                       border: '2px solid #000000',
                       borderRadius: '4px',
-                      padding: '4px',
+                      padding: '6px 4px',
                       textAlign: 'center',
                       boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
                       boxSizing: 'border-box'
@@ -374,7 +388,9 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                       style={{
                         fontWeight: 800,
                         fontSize: '10px',
-                        color: '#0f172a'
+                        lineHeight: '14px',
+                        color: '#0f172a',
+                        fontFamily: fontSans
                       }}
                     >
                       {initialCpeSpecialUnit.unidade}
@@ -398,7 +414,8 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
                         fontSize: '9px',
                         fontWeight: 700,
                         color: '#1e293b',
-                        lineHeight: 1.35
+                        lineHeight: '14px',
+                        fontFamily: fontSans
                       }}
                     >
                       {initialCpeSpecialUnit.municipios.map((m, idx) => (
@@ -428,27 +445,29 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
         <div
           style={{
             fontSize: '11px',
+            lineHeight: '16px',
             color: '#64748b',
-            fontWeight: 500
+            fontWeight: 600,
+            fontFamily: fontSans
           }}
         >
           Polícia Militar do Maranhão • Comando do Policiamento do Interior (CPI) • Organograma Oficial 2026
         </div>
 
-        {/* CMT's DE ÁREA DO INTERIOR TABLE */}
+        {/* CMT's DE ÁREA DO INTERIOR TABLE (overflow: visible so row 9 is never clipped) */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-end',
-            gap: '12px'
+            gap: '14px'
           }}
         >
           <div
             style={{
               border: '2px solid #000000',
               borderRadius: '4px',
-              overflow: 'hidden',
+              overflow: 'visible',
               boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
               backgroundColor: '#ffffff'
             }}
@@ -457,114 +476,188 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
               style={{
                 backgroundColor: '#005a2b',
                 color: '#ffffff',
-                textAlign: 'center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 fontWeight: 900,
                 fontSize: '12px',
-                padding: '4px 12px',
+                lineHeight: '18px',
+                padding: '7px 16px',
                 textTransform: 'uppercase',
-                letterSpacing: '0.025em',
-                borderBottom: '1px solid #000000'
+                letterSpacing: '0.03em',
+                borderBottom: '2px solid #000000',
+                fontFamily: fontSans
               }}
             >
-              CMT&apos;s DE ÁREA DO INTERIOR
+              CMT&apos;S DE ÁREA DO INTERIOR
             </div>
             <table
               style={{
-                fontSize: '10px',
+                fontSize: '10.5px',
+                lineHeight: '16px',
                 textAlign: 'left',
-                borderCollapse: 'collapse',
-                backgroundColor: '#ffffff'
+                borderCollapse: 'separate',
+                borderSpacing: 0,
+                backgroundColor: '#ffffff',
+                fontFamily: fontSans,
+                width: '100%'
               }}
             >
               <thead>
                 <tr
                   style={{
                     backgroundColor: '#f1f5f9',
-                    borderBottom: '1px solid #cbd5e1',
-                    fontWeight: 700,
+                    fontWeight: 800,
                     color: '#1e293b'
                   }}
                 >
-                  <th style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0' }}>CPAI</th>
-                  <th style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0' }}>POSTO/NOME</th>
-                  <th style={{ padding: '4px 12px', borderRight: '1px solid #e2e8f0' }}>CONTATO</th>
-                  <th style={{ padding: '4px 12px' }}>E-MAIL</th>
-                </tr>
-              </thead>
-              <tbody style={{ fontWeight: 500 }}>
-                {sortedCommands.map((c, idx) => (
-                  <tr
-                    key={c.id}
+                  <th
                     style={{
-                      backgroundColor: '#ffffff',
-                      borderBottom: idx < sortedCommands.length - 1 ? '1px solid #e2e8f0' : 'none'
+                      padding: '6px 14px',
+                      lineHeight: '16px',
+                      borderRight: '1px solid #cbd5e1',
+                      borderBottom: '1px solid #cbd5e1',
+                      verticalAlign: 'middle',
+                      whiteSpace: 'nowrap'
                     }}
                   >
-                    <td
+                    CPAI
+                  </th>
+                  <th
+                    style={{
+                      padding: '6px 14px',
+                      lineHeight: '16px',
+                      borderRight: '1px solid #cbd5e1',
+                      borderBottom: '1px solid #cbd5e1',
+                      verticalAlign: 'middle',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    POSTO/NOME
+                  </th>
+                  <th
+                    style={{
+                      padding: '6px 14px',
+                      lineHeight: '16px',
+                      borderRight: '1px solid #cbd5e1',
+                      borderBottom: '1px solid #cbd5e1',
+                      verticalAlign: 'middle',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    CONTATO
+                  </th>
+                  <th
+                    style={{
+                      padding: '6px 14px',
+                      lineHeight: '16px',
+                      borderBottom: '1px solid #cbd5e1',
+                      verticalAlign: 'middle',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    E-MAIL
+                  </th>
+                </tr>
+              </thead>
+              <tbody style={{ fontWeight: 600 }}>
+                {sortedCommands.map((c, idx) => {
+                  const bottomBorder =
+                    idx < sortedCommands.length - 1 ? '1px solid #e2e8f0' : 'none';
+                  return (
+                    <tr
+                      key={c.id}
                       style={{
-                        padding: '2px 12px',
-                        fontWeight: 700,
-                        borderRight: '1px solid #e2e8f0',
-                        color: '#0f172a'
+                        backgroundColor: idx % 2 === 1 ? '#f8fafc' : '#ffffff'
                       }}
                     >
-                      {c.sigla}
-                    </td>
-                    <td
-                      style={{
-                        padding: '2px 12px',
-                        fontWeight: 700,
-                        borderRight: '1px solid #e2e8f0',
-                        color: '#0f172a'
-                      }}
-                    >
-                      {c.comandante}
-                    </td>
-                    <td
-                      style={{
-                        padding: '2px 12px',
-                        fontFamily: fontMono,
-                        borderRight: '1px solid #e2e8f0',
-                        color: '#1e293b'
-                      }}
-                    >
-                      {c.telefone}
-                    </td>
-                    <td
-                      style={{
-                        padding: '2px 12px',
-                        color: '#475569',
-                        fontFamily: fontMono,
-                        fontSize: '9px'
-                      }}
-                    >
-                      {c.email}
-                    </td>
-                  </tr>
-                ))}
+                      <td
+                        style={{
+                          padding: '5px 14px',
+                          lineHeight: '16px',
+                          fontWeight: 800,
+                          borderRight: '1px solid #e2e8f0',
+                          borderBottom: bottomBorder,
+                          color: '#0f172a',
+                          verticalAlign: 'middle',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {c.sigla}
+                      </td>
+                      <td
+                        style={{
+                          padding: '5px 14px',
+                          lineHeight: '16px',
+                          fontWeight: 700,
+                          borderRight: '1px solid #e2e8f0',
+                          borderBottom: bottomBorder,
+                          color: '#0f172a',
+                          verticalAlign: 'middle',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {c.comandante}
+                      </td>
+                      <td
+                        style={{
+                          padding: '5px 14px',
+                          lineHeight: '16px',
+                          fontFamily: fontSans,
+                          fontVariantNumeric: 'tabular-nums',
+                          fontWeight: 600,
+                          borderRight: '1px solid #e2e8f0',
+                          borderBottom: bottomBorder,
+                          color: '#1e293b',
+                          verticalAlign: 'middle',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {c.telefone}
+                      </td>
+                      <td
+                        style={{
+                          padding: '5px 14px',
+                          lineHeight: '16px',
+                          color: '#334155',
+                          fontFamily: fontSans,
+                          fontSize: '10px',
+                          fontWeight: 600,
+                          borderBottom: bottomBorder,
+                          verticalAlign: 'middle',
+                          whiteSpace: 'nowrap'
+                        }}
+                      >
+                        {c.email}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
-          {/* ÚLTIMA MODIFICAÇÃO (Dado automático) */}
+          {/* ÚLTIMA MODIFICAÇÃO (Dado automático - sempre a data do dia em que o relatório é gerado) */}
           <div
             style={{
               border: '2px solid #000000',
               backgroundColor: '#ffffff',
               borderRadius: '4px',
-              padding: '6px',
+              padding: '8px 18px',
               textAlign: 'center',
               boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-              minWidth: '200px',
+              minWidth: '230px',
               boxSizing: 'border-box'
             }}
           >
             <p
               style={{
-                fontSize: '9px',
+                fontSize: '9.5px',
+                lineHeight: '14px',
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 color: '#475569',
+                fontFamily: fontSans,
                 margin: 0
               }}
             >
@@ -572,14 +665,16 @@ export const OfficialPdfModelSheet: React.FC<OfficialPdfModelSheetProps> = ({
             </p>
             <p
               style={{
-                fontSize: '12px',
+                fontSize: '13px',
+                lineHeight: '18px',
                 fontWeight: 900,
                 color: '#0f172a',
-                fontFamily: fontMono,
-                margin: '2px 0 0 0'
+                fontFamily: fontSans,
+                fontVariantNumeric: 'tabular-nums',
+                margin: '3px 0 0 0'
               }}
             >
-              {topCommand.dataAtualizacao || '11/11/2026'}
+              {currentDateBR}
             </p>
           </div>
         </div>

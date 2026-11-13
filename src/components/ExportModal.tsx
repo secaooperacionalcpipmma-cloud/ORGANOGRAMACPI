@@ -23,6 +23,7 @@ import {
   OFFICIAL_ORIGINAL_PDF_URL,
   printOrganogram
 } from '../utils/exportUtils';
+import { getCurrentDateBR } from '../utils/dateUtils';
 
 export type ExportFormatTab = 'formato1' | 'formato2' | 'formato3';
 
@@ -265,7 +266,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 </div>
 
                 <div className="text-[11px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded border border-slate-200">
-                  Atualização: {database.topCommand.dataAtualizacao || '11/11/2026'}
+                  Atualização: {getCurrentDateBR()}
                 </div>
               </div>
 

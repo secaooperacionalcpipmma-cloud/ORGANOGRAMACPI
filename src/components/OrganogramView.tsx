@@ -7,6 +7,7 @@ import {
 } from '../types/organogram';
 import { initialCpeSpecialUnit } from '../data/seedData';
 import { matchesCommand, matchesUnit, normalizeCpai, normalizeText } from '../utils/searchUtils';
+import { getCurrentDateBR } from '../utils/dateUtils';
 import { 
   ZoomIn, 
   ZoomOut, 
@@ -555,7 +556,7 @@ export const OrganogramView: React.FC<OrganogramViewProps> = ({
                 ))}
               </div>
               <div className="mt-3 pt-2 border-t border-slate-200 text-[10px] font-bold text-slate-500">
-                ÚLTIMA MODIFICAÇÃO: {topCommand.dataAtualizacao || '05/11/2026'}
+                ÚLTIMA MODIFICAÇÃO: {getCurrentDateBR()}
               </div>
             </div>
           </div>
@@ -778,7 +779,7 @@ export const OrganogramView: React.FC<OrganogramViewProps> = ({
                       ÚLTIMA MODIFICAÇÃO (Dado automático)
                     </p>
                     <p className="text-xs font-black text-slate-900 font-mono">
-                      {topCommand.dataAtualizacao || '05/11/2026'}
+                      {getCurrentDateBR()}
                     </p>
                   </div>
                 </div>

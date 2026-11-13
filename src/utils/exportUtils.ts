@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { OrganogramDatabase } from '../types/organogram';
+import { getCurrentDateBR } from './dateUtils';
 
 /**
  * URL for the original official PDF uploaded by the user
@@ -178,9 +179,8 @@ export async function safeHtml2Canvas(
           const cleanStyle = clonedDoc.createElement('style');
           cleanStyle.textContent = `
             *, *::before, *::after { box-sizing: border-box; }
-            html, body { margin: 0; padding: 0; background-color: #ffffff; color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
+            html, body { margin: 0; padding: 0; background-color: #ffffff; color: #0f172a; font-family: Arial, Helvetica, sans-serif; }
             img { display: block; max-width: 100%; }
-            table { border-collapse: collapse; }
           `;
           clonedDoc.head.appendChild(cleanStyle);
         } else {
@@ -407,9 +407,10 @@ export function exportCadastralReportPdf(
     { align: 'center' }
   );
 
+  const currentDate = getCurrentDateBR();
   doc.setFontSize(8);
   doc.text(
-    `Atualização: ${db.lastUpdated || db.topCommand.dataAtualizacao || '11/11/2026'} | Gerado em: ${new Date().toLocaleDateString('pt-BR')}`,
+    `Última modificação (Dado automático): ${currentDate} | Gerado em: ${currentDate}`,
     pageWidth / 2,
     21,
     { align: 'center' }
