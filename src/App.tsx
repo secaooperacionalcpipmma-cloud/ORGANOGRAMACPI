@@ -21,6 +21,7 @@ import { AdminLoginModal } from './components/AdminLoginModal';
 import { ExportModal } from './components/ExportModal';
 import { OfficialPdfModelSheet } from './components/OfficialPdfModelSheet';
 import { CadastralReportSheet } from './components/CadastralReportSheet';
+import { CompanhiasView } from './components/CompanhiasView';
 import { 
   exportVisualOrganogramPdf, 
   exportVisualOrganogramPng, 
@@ -532,6 +533,15 @@ export default function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* TAB 4B: Batalhões e Companhias */}
+        {activeTab === 'companhias' && (
+          <CompanhiasView
+            database={database}
+            globalSearchTerm={searchTerm}
+            onSelectUnit={(unit) => setSelectedUnitForDetail(unit)}
+          />
         )}
 
         {/* TAB 5: Municípios */}

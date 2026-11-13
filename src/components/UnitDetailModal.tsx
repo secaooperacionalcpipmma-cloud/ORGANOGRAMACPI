@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { SubordinateUnit, GrandCommand, UserRole } from '../types/organogram';
+import { COMPANHIAS_POR_CPAI } from '../data/companhiasData';
+import { normalizeUnitId } from '../utils/searchUtils';
 import { 
   X, 
   MapPin, 
@@ -36,6 +38,15 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
 
   const parentCmd = commands.find(c => c.id === unit.grandCommandId);
   const emblemToDisplay = unit.emblemaUrl || parentCmd?.emblemaUrl || '/assets/aistudio/CPAI_1_9c470153.jpg';
+
+  const unitIdNorm = normalizeUnitId(unit.identificacao);
+  const officialBatalhaoCompanhias = COMPANHIAS_POR_CPAI
+    .flatMap(g => g.batalhoes)
+    .find(b => {
+      const baseNorm = normalizeUnitId(b.upm.split(/\s*-\s*/)[0]);
+      const fullNorm = normalizeUnitId(b.upm);
+      return baseNorm === unitIdNorm || fullNorm === unitIdNorm;
+    });
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -231,6 +242,34 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
                     )}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Official Companhias / Pelotões / DPMs from PDF */}
+          {officialBatalhaoCompanhias && officialBatalhaoCompanhias.companhias.length > 0 && (
+            <div className="space-y-2">
+              <h5 className="font-extrabold uppercase text-xs text-slate-700 tracking-wide flex items-center space-x-1">
+                <Building2 className="w-3.5 h-3.5 text-[#005a2b]" />
+                <span>COMPANHIAS, PELOTÕES E DPMs PERTENCENTES ({officialBatalhaoCompanhias.companhias.length})</span>
+              </h5>
+              <div className="border border-slate-300 rounded overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border-b border-slate-200">
+                    <tr>
+                      <th className="py-1.5 px-3">Cidade / Localidade</th>
+                      <th className="py-1.5 px-3">Companhia / Pelotão / DPM</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 bg-white">
+                    {officialBatalhaoCompanhias.companhias.map((c, idx) => (
+                      <tr key={idx} className={idx % 2 === 1 ? 'bg-slate-50' : 'bg-white'}>
+                        <td className="py-1.5 px-3 font-bold text-slate-900">{c.cidade}</td>
+                        <td className="py-1.5 px-3 font-extrabold text-[#005a2b]">{c.companhia || '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

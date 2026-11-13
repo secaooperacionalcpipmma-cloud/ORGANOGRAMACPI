@@ -3,6 +3,7 @@ import {
   Network, 
   ShieldAlert, 
   Building, 
+  GitBranch,
   MapPin, 
   Users, 
   Image as ImageIcon, 
@@ -17,6 +18,7 @@ export type NavTab =
   | 'organograma'
   | 'comandos'
   | 'unidades'
+  | 'companhias'
   | 'municipios'
   | 'comandantes'
   | 'emblemas'
@@ -59,6 +61,11 @@ export const Navbar: React.FC<NavbarProps> = ({
       id: 'unidades',
       label: 'Unidades e Batalhões',
       icon: <Building className="w-4 h-4" />
+    },
+    {
+      id: 'companhias',
+      label: 'Batalhões e Companhias',
+      icon: <GitBranch className="w-4 h-4" />
     },
     {
       id: 'municipios',
