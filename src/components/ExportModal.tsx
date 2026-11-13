@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { OrganogramDatabase } from '../types/organogram';
 import {
   X,
@@ -49,6 +49,12 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const [activeTab, setActiveTab] = useState<ExportFormatTab>(resolveInitialTab(initialFormat));
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setActiveTab(resolveInitialTab(initialFormat));
+    }
+  }, [isOpen, initialFormat]);
 
   if (!isOpen) return null;
 
@@ -114,7 +120,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     setLoadingAction('formato2-png');
     try {
       await exportCadastralReportPng(
-        'report-printable-area',
+        'cadastral-report-sheet',
         `RELATORIO_CADASTRAL_CPI_PMMA_FORMATO_II_${Date.now()}.png`
       );
       showSuccess('Imagem PNG do FORMATO II (Relatório Cadastral) exportada com sucesso!');

@@ -107,10 +107,10 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ database }) => {
   const handleCadastralPng = async () => {
     setIsExporting(true);
     try {
-      await exportCadastralReportPng('report-printable-area');
+      await exportCadastralReportPng('cadastral-report-sheet');
       showFeedback('Imagem PNG do Relatório Cadastral baixada!');
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      alert(`Erro ao gerar imagem do relatório cadastral: ${e.message}`);
     } finally {
       setIsExporting(false);
     }

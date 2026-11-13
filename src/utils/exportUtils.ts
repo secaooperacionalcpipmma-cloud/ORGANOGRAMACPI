@@ -15,125 +15,207 @@ export const OFFICIAL_ORIGINAL_PDF_URL =
 let dummyCanvas: HTMLCanvasElement | null = null;
 let dummyCtx: CanvasRenderingContext2D | null = null;
 
+function ensureDummyCtx(): CanvasRenderingContext2D | null {
+  if (typeof document === 'undefined') return null;
+  if (!dummyCanvas) {
+    dummyCanvas = document.createElement('canvas');
+    dummyCanvas.width = 1;
+    dummyCanvas.height = 1;
+    dummyCtx = dummyCanvas.getContext('2d');
+  }
+  return dummyCtx;
+}
+
+function resolveColorFunction(expr: string): string {
+  try {
+    const ctx = ensureDummyCtx();
+    if (ctx) {
+      ctx.fillStyle = '#010203';
+      ctx.fillStyle = expr;
+      const result = ctx.fillStyle;
+      if (
+        result &&
+        typeof result === 'string' &&
+        !result.includes('oklch') &&
+        !result.includes('oklab') &&
+        !result.includes('color(') &&
+        !result.includes('color-mix(')
+      ) {
+        return result;
+      }
+    }
+  } catch {
+    // ignore conversion errors and fall back below
+  }
+
+  if (expr.includes('0.696') || expr.includes('emerald') || expr.includes('green')) {
+    return '#005a2b';
+  }
+  if (expr.includes('0.9') || expr.includes('1 0 0')) {
+    return '#ffffff';
+  }
+  return '#0f172a';
+}
+
 /**
- * Converts modern CSS color functions (like Tailwind v4 oklch(...) or color(...))
- * to standard rgb(...) using the browser's native Canvas 2D engine.
- * Prevents: 'Attempting to parse an unsupported color function "oklch"'.
+ * Replaces modern CSS color functions (oklch, oklab, lab, lch, color, color-mix)
+ * including nested parentheses with standard rgb/hex colors.
  */
 export function convertOklchToRgb(str: string): string {
   if (!str || typeof str !== 'string') return str;
-  if (!str.includes('oklch') && !str.includes('color(')) return str;
-
-  if (typeof document !== 'undefined') {
-    if (!dummyCanvas) {
-      dummyCanvas = document.createElement('canvas');
-      dummyCanvas.width = 1;
-      dummyCanvas.height = 1;
-      dummyCtx = dummyCanvas.getContext('2d');
-    }
+  if (
+    !str.includes('oklch(') &&
+    !str.includes('oklab(') &&
+    !str.includes('lab(') &&
+    !str.includes('lch(') &&
+    !str.includes('color(') &&
+    !str.includes('color-mix(')
+  ) {
+    return str;
   }
 
-  return str.replace(/oklch\([^)]+\)/gi, (match) => {
-    try {
-      if (dummyCtx) {
-        dummyCtx.fillStyle = '#ffffff';
-        dummyCtx.fillStyle = match;
-        const result = dummyCtx.fillStyle;
-        if (result && !result.includes('oklch')) {
-          return result;
-        }
+  // Iteratively resolve balanced function calls from innermost to outermost
+  let current = str;
+  const pattern = /(oklch|oklab|color-mix|color|lch|lab)\(([^()]*)\)/gi;
+  let guard = 0;
+  while (pattern.test(current) && guard < 6) {
+    current = current.replace(pattern, (match) => resolveColorFunction(match));
+    guard++;
+  }
+
+  // Final safety sweep if anything malformed remains
+  if (current.includes('oklch(') || current.includes('oklab(') || current.includes('color(')) {
+    current = current.replace(/(oklch|oklab|color-mix|color|lch|lab)\([^)]*\)/gi, '#0f172a');
+  }
+
+  return current;
+}
+
+/**
+ * Safely wraps a CSSStyleDeclaration without ever triggering Chrome/V8
+ * "TypeError: Illegal invocation" on native getters or methods.
+ */
+function wrapStyleDeclaration(style: CSSStyleDeclaration): CSSStyleDeclaration {
+  return new Proxy(style, {
+    get(target, prop) {
+      if (prop === 'getPropertyValue') {
+        return (propertyName: string) => {
+          const res = target.getPropertyValue(propertyName);
+          return typeof res === 'string' ? convertOklchToRgb(res) : res;
+        };
       }
-    } catch {
-      // ignore
+
+      // CRITICAL: Pass `target` (NOT the Proxy receiver!) to Reflect.get
+      // Passing Proxy as receiver causes `Illegal invocation` on CSSStyleDeclaration getters.
+      const val = Reflect.get(target, prop, target);
+
+      if (typeof val === 'function') {
+        return val.bind(target);
+      }
+      if (typeof val === 'string') {
+        return convertOklchToRgb(val);
+      }
+      return val;
+    },
+    set(target, prop, value) {
+      return Reflect.set(target, prop, value, target);
     }
-    // Fallback standard colors if canvas translation encounters error
-    if (match.includes('0.208') || match.includes('slate-900') || match.includes('black')) return '#0f172a';
-    if (match.includes('0.696') || match.includes('emerald') || match.includes('green')) return '#005a2b';
-    return '#ffffff';
   });
 }
 
 /**
- * Safe wrapper around html2canvas that intercepts getComputedStyle and cloned stylesheets,
- * guaranteeing html2canvas never encounters an oklch(...) color value.
+ * Waits until all images inside a container have loaded or errored.
  */
-export async function safeHtml2Canvas(element: HTMLElement, options: any = {}): Promise<HTMLCanvasElement> {
-  const originalGetComputedStyle = typeof window !== 'undefined' ? window.getComputedStyle : null;
-
-  // Intercept main window.getComputedStyle during capture
-  if (originalGetComputedStyle && typeof window !== 'undefined') {
-    window.getComputedStyle = function(elt: Element, pseudoElt?: string | null) {
-      const style = originalGetComputedStyle.call(window, elt, pseudoElt);
-      return new Proxy(style, {
-        get(target, prop, receiver) {
-          const val = Reflect.get(target, prop, receiver);
-          if (typeof val === 'string' && (val.includes('oklch') || val.includes('color('))) {
-            return convertOklchToRgb(val);
-          }
-          if (typeof val === 'function' && prop === 'getPropertyValue') {
-            return (propertyName: string) => {
-              const res = target.getPropertyValue(propertyName);
-              if (typeof res === 'string' && (res.includes('oklch') || res.includes('color('))) {
-                return convertOklchToRgb(res);
-              }
-              return res;
-            };
-          }
-          return val;
-        }
+async function waitForImages(container: HTMLElement): Promise<void> {
+  const imgs = Array.from(container.querySelectorAll('img'));
+  await Promise.all(
+    imgs.map((img) => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise<void>((resolve) => {
+        const done = () => resolve();
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+        setTimeout(done, 2500);
       });
+    })
+  );
+}
+
+/**
+ * Safe wrapper around html2canvas that intercepts getComputedStyle without Illegal invocation
+ * and cleans modern CSS colors/stylesheets before capture.
+ */
+export async function safeHtml2Canvas(
+  element: HTMLElement,
+  options: any = {}
+): Promise<HTMLCanvasElement> {
+  await waitForImages(element);
+
+  const originalGetComputedStyle =
+    typeof window !== 'undefined' ? window.getComputedStyle : null;
+
+  if (originalGetComputedStyle && typeof window !== 'undefined') {
+    window.getComputedStyle = function (elt: Element, pseudoElt?: string | null) {
+      const style = originalGetComputedStyle.call(window, elt, pseudoElt);
+      return wrapStyleDeclaration(style);
     };
   }
 
   try {
     const userOnClone = options.onclone;
+    const isSelfContainedSheet =
+      element.id === 'official-pdf-model-sheet' || element.id === 'cadastral-report-sheet';
+
     const mergedOptions = {
       ...options,
       onclone: (clonedDoc: Document, clonedEl: HTMLElement) => {
-        // 1. Sanitize all <style> elements in the cloned document
-        const styles = clonedDoc.querySelectorAll('style');
-        styles.forEach((styleTag) => {
-          if (styleTag.textContent && (styleTag.textContent.includes('oklch') || styleTag.textContent.includes('color('))) {
-            styleTag.textContent = convertOklchToRgb(styleTag.textContent);
-          }
-        });
+        if (isSelfContainedSheet) {
+          // For 100% inline-styled export sheets, strip external Tailwind v4 stylesheets
+          // so html2canvas never encounters any oklch() custom properties or CSS rules.
+          clonedDoc.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
+            node.parentNode?.removeChild(node);
+          });
+          const cleanStyle = clonedDoc.createElement('style');
+          cleanStyle.textContent = `
+            *, *::before, *::after { box-sizing: border-box; }
+            html, body { margin: 0; padding: 0; background-color: #ffffff; color: #0f172a; font-family: system-ui, -apple-system, sans-serif; }
+            img { display: block; max-width: 100%; }
+            table { border-collapse: collapse; }
+          `;
+          clonedDoc.head.appendChild(cleanStyle);
+        } else {
+          // Sanitize <style> tags in cloned document
+          const styles = clonedDoc.querySelectorAll('style');
+          styles.forEach((styleTag) => {
+            if (styleTag.textContent) {
+              styleTag.textContent = convertOklchToRgb(styleTag.textContent);
+            }
+          });
+        }
 
-        // 2. Intercept getComputedStyle in the cloned document's iframe window
-        const iframeWin = clonedDoc.defaultView || window;
+        // Safely wrap cloned iframe's getComputedStyle as well
+        const iframeWin = clonedDoc.defaultView;
         if (iframeWin && iframeWin.getComputedStyle) {
-          const iframeGetComputedStyle = iframeWin.getComputedStyle.bind(iframeWin);
-          iframeWin.getComputedStyle = function(elt: Element, pseudoElt?: string | null) {
-            const style = iframeGetComputedStyle(elt, pseudoElt);
-            return new Proxy(style, {
-              get(target, prop, receiver) {
-                const val = Reflect.get(target, prop, receiver);
-                if (typeof val === 'string' && (val.includes('oklch') || val.includes('color('))) {
-                  return convertOklchToRgb(val);
-                }
-                if (typeof val === 'function' && prop === 'getPropertyValue') {
-                  return (propertyName: string) => {
-                    const res = target.getPropertyValue(propertyName);
-                    if (typeof res === 'string' && (res.includes('oklch') || res.includes('color('))) {
-                      return convertOklchToRgb(res);
-                    }
-                    return res;
-                  };
-                }
-                return val;
-              }
-            });
+          const origIframeGetComputedStyle = iframeWin.getComputedStyle.bind(iframeWin);
+          iframeWin.getComputedStyle = function (elt: Element, pseudoElt?: string | null) {
+            const style = origIframeGetComputedStyle(elt, pseudoElt);
+            return wrapStyleDeclaration(style);
           };
         }
 
-        // 3. Ensure target element and its ancestors are completely visible in cloned iframe
+        // Ensure cloned element & ancestors are fully visible at (0, 0)
         if (clonedEl) {
           let p: HTMLElement | null = clonedEl.parentElement;
           while (p && p !== clonedDoc.body) {
+            p.style.position = 'static';
+            p.style.left = '0';
+            p.style.top = '0';
             p.style.width = 'auto';
             p.style.height = 'auto';
             p.style.overflow = 'visible';
             p.style.opacity = '1';
             p.style.visibility = 'visible';
+            p.style.display = 'block';
             p = p.parentElement;
           }
           clonedEl.style.opacity = '1';
@@ -156,16 +238,12 @@ export async function safeHtml2Canvas(element: HTMLElement, options: any = {}): 
 }
 
 // ============================================================================
-// VERSÃO 1: MODELO GRÁFICO OFICIAL (IDÊNTICO AO PDF ANEXO)
+// FORMATO I: ORGANOGRAMA GRÁFICO OFICIAL (9 COLUNAS - DADOS DO SISTEMA)
 // ============================================================================
 
 /**
- * Exports the visual 9-columns organogram sheet as a high-definition landscape PDF
- * perfectly fitted onto a single landscape page (A3 landscape for maximum sharpness).
- */
-/**
- * Exports the visual 9-columns organogram sheet (FORMATO I - Print 01) as a high-definition landscape PDF
- * generated dynamically from current system database data.
+ * Exports the visual 9-columns organogram sheet (FORMATO I) as a high-definition landscape PDF
+ * generated dynamically from current system database data, matching the Organograma Completo view.
  */
 export async function exportVisualOrganogramPdf(
   elementId = 'official-pdf-model-sheet',
@@ -174,7 +252,8 @@ export async function exportVisualOrganogramPdf(
   const wrapper = document.getElementById('export-sheet-wrapper');
   if (wrapper) {
     wrapper.style.display = 'block';
-    wrapper.style.opacity = '0.01';
+    wrapper.style.left = '-10000px';
+    wrapper.style.opacity = '1';
   }
 
   try {
@@ -186,7 +265,7 @@ export async function exportVisualOrganogramPdf(
       throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
     }
 
-    const scale = (typeof window !== 'undefined' && window.innerWidth < 768) ? 1.6 : 2.0;
+    const scale = typeof window !== 'undefined' && window.innerWidth < 768 ? 1.5 : 2.0;
 
     const canvas = await safeHtml2Canvas(element, {
       scale,
@@ -194,7 +273,7 @@ export async function exportVisualOrganogramPdf(
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
-      windowWidth: 1600,
+      windowWidth: 1620
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.98);
@@ -203,13 +282,12 @@ export async function exportVisualOrganogramPdf(
     const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
-      format: 'a3',
+      format: 'a3'
     });
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
 
-    // Compute dimensions preserving aspect ratio
     const imgWidth = canvas.width;
     const imgHeight = canvas.height;
     const margin = 8; // 8mm margins
@@ -227,13 +305,14 @@ export async function exportVisualOrganogramPdf(
   } finally {
     if (wrapper) {
       wrapper.style.display = 'none';
+      wrapper.style.left = '0';
       wrapper.style.opacity = '0';
     }
   }
 }
 
 /**
- * Exports the visual 9-columns organogram sheet (FORMATO I - Print 01) as a high-resolution PNG image
+ * Exports the visual 9-columns organogram sheet (FORMATO I) as a high-resolution PNG image
  * generated dynamically from current system database data.
  */
 export async function exportVisualOrganogramPng(
@@ -243,7 +322,8 @@ export async function exportVisualOrganogramPng(
   const wrapper = document.getElementById('export-sheet-wrapper');
   if (wrapper) {
     wrapper.style.display = 'block';
-    wrapper.style.opacity = '0.01';
+    wrapper.style.left = '-10000px';
+    wrapper.style.opacity = '1';
   }
 
   try {
@@ -255,7 +335,7 @@ export async function exportVisualOrganogramPng(
       throw new Error('Elemento da prancha gráfica oficial não encontrado para exportação.');
     }
 
-    const scale = (typeof window !== 'undefined' && window.innerWidth < 768) ? 1.6 : 2.0;
+    const scale = typeof window !== 'undefined' && window.innerWidth < 768 ? 1.5 : 2.0;
 
     const canvas = await safeHtml2Canvas(element, {
       scale,
@@ -263,7 +343,7 @@ export async function exportVisualOrganogramPng(
       allowTaint: true,
       backgroundColor: '#ffffff',
       logging: false,
-      windowWidth: 1600,
+      windowWidth: 1620
     });
 
     const dataUrl = canvas.toDataURL('image/png');
@@ -276,27 +356,28 @@ export async function exportVisualOrganogramPng(
   } finally {
     if (wrapper) {
       wrapper.style.display = 'none';
+      wrapper.style.left = '0';
       wrapper.style.opacity = '0';
     }
   }
 }
 
 // ============================================================================
-// VERSÃO 2: RELATÓRIO CADASTRAL E OPERACIONAL (VERSÃO EXISTENTE NO SISTEMA)
+// FORMATO II: RELATÓRIO CADASTRAL E OPERACIONAL (TABULAR - PRINT 02)
 // ============================================================================
 
 /**
- * Generates the existing official Institutional Cadastral PDF Report
+ * Generates the official Institutional Cadastral PDF Report (FORMATO II)
  * Multi-page structured report with all unit lists, commands, commanders and contacts
  */
 export function exportCadastralReportPdf(
   db: OrganogramDatabase,
-  filename = 'RELATORIO_CADASTRAL_CPI_PMMA_2026.pdf'
+  filename = 'RELATORIO_CADASTRAL_CPI_PMMA_FORMATO_II_2026.pdf'
 ): void {
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
-    format: 'a4',
+    format: 'a4'
   });
 
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -377,7 +458,7 @@ export function exportCadastralReportPdf(
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.text(`Cmdte: ${cmd.comandante} | Contato: ${cmd.telefone}`, pageWidth - 14, y + 5, {
-      align: 'right',
+      align: 'right'
     });
 
     y += 8;
@@ -446,32 +527,58 @@ export function exportCadastralReportPdf(
 }
 
 /**
- * Captures an element (like the printable report) as PNG image
+ * Captures the Cadastral Report (FORMATO II) as PNG image from any tab
  */
 export async function exportCadastralReportPng(
-  elementId = 'report-printable-area',
-  filename = 'RELATORIO_CADASTRAL_CPI_PMMA_2026.png'
+  elementId = 'cadastral-report-sheet',
+  filename = 'RELATORIO_CADASTRAL_CPI_PMMA_FORMATO_II_2026.png'
 ): Promise<void> {
-  const element = document.getElementById(elementId);
-  if (!element) {
+  const cadastralWrapper = document.getElementById('export-cadastral-wrapper');
+  let targetElement = document.getElementById(elementId);
+
+  // If caller passed 'report-printable-area' while not on the Reports tab, fallback to offscreen sheet
+  if (!targetElement) {
+    targetElement =
+      document.getElementById('cadastral-report-sheet') ||
+      document.getElementById('report-printable-area');
+  }
+
+  if (!targetElement) {
     throw new Error('Elemento do relatório cadastral não encontrado para captura.');
   }
 
-  const canvas = await safeHtml2Canvas(element, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-    logging: false,
-  });
+  const usingOffscreen = targetElement.id === 'cadastral-report-sheet' && cadastralWrapper;
+  if (usingOffscreen && cadastralWrapper) {
+    cadastralWrapper.style.display = 'block';
+    cadastralWrapper.style.left = '-10000px';
+    cadastralWrapper.style.opacity = '1';
+  }
 
-  const dataUrl = canvas.toDataURL('image/png');
-  const link = document.createElement('a');
-  link.href = dataUrl;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  try {
+    const scale = typeof window !== 'undefined' && window.innerWidth < 768 ? 1.5 : 2.0;
+    const canvas = await safeHtml2Canvas(targetElement, {
+      scale,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      windowWidth: 1200
+    });
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } finally {
+    if (usingOffscreen && cadastralWrapper) {
+      cadastralWrapper.style.display = 'none';
+      cadastralWrapper.style.left = '0';
+      cadastralWrapper.style.opacity = '0';
+    }
+  }
 }
 
 // ============================================================================

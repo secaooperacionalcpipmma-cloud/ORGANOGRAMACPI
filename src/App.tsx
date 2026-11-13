@@ -20,6 +20,7 @@ import { HistoryView } from './components/HistoryView';
 import { AdminLoginModal } from './components/AdminLoginModal';
 import { ExportModal } from './components/ExportModal';
 import { OfficialPdfModelSheet } from './components/OfficialPdfModelSheet';
+import { CadastralReportSheet } from './components/CadastralReportSheet';
 import { 
   exportVisualOrganogramPdf, 
   exportVisualOrganogramPng, 
@@ -260,7 +261,7 @@ export default function App() {
   const handleExportCadastralPng = async () => {
     setIsExporting(true);
     try {
-      await exportCadastralReportPng('report-printable-area');
+      await exportCadastralReportPng('cadastral-report-sheet');
     } catch (e: any) {
       alert(`Erro ao exportar PNG do relatório: ${e.message}`);
     } finally {
@@ -662,6 +663,26 @@ export default function App() {
       >
         <div style={{ width: '1580px', minWidth: '1580px' }}>
           <OfficialPdfModelSheet database={database} id="official-pdf-model-sheet" />
+        </div>
+      </div>
+
+      {/* Offscreen Render Sheet for PNG Capture of FORMATO II (Works from any tab) */}
+      <div 
+        id="export-cadastral-wrapper"
+        style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          width: '1200px', 
+          zIndex: -99999,
+          pointerEvents: 'none',
+          opacity: 0,
+          display: 'none'
+        }} 
+        aria-hidden="true"
+      >
+        <div style={{ width: '1200px', minWidth: '1200px' }}>
+          <CadastralReportSheet database={database} id="cadastral-report-sheet" />
         </div>
       </div>
 
